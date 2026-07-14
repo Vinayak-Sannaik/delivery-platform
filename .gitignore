@@ -1,1 +1,10 @@
+node_modules/
+dist/
 .env
+.env.local
+.venv/
+.deps/
+__pycache__/
+.pytest_cache/
+.DS_Store
+credentials.json
