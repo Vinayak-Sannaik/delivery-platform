@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends
-from sqlalchemy.orm import Session
 
-from app.dependencies.database import get_db
+from app.dependencies.services import get_auth_service 
+
 from app.schemas.user import SignupRequest, SignupResponse
 from app.services.auth_service import AuthService
 
@@ -11,14 +11,13 @@ router = APIRouter(
 )
 
 
+from fastapi import Depends
+
 @router.post("/signup", response_model=SignupResponse)
 def signup(
     request: SignupRequest,
-    db: Session = Depends(get_db),
+    service: AuthService = Depends(get_auth_service),
 ):
-
-    service = AuthService(db)
-
     user = service.signup(request)
 
     return SignupResponse(

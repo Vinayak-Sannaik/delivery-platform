@@ -1,34 +1,3 @@
-# from pwdlib import PasswordHash
-
-# from app.models.user import User
-# from app.repositories.user_repository import UserRepository
-# from app.schemas.user import SignupRequest
-
-# password_hash = PasswordHash.recommended()
-
-
-# class AuthService:
-
-#     def __init__(self, repo: UserRepository):
-#         self.repo = repo
-
-#     def signup(self, request: SignupRequest):
-
-#         existing = self.repo.find_by_email(request.email)
-
-#         if existing:
-#             raise ValueError("Email already exists")
-
-#         user = User(
-#             email=request.email,
-#             password_hash=password_hash.hash(request.password),
-#             first_name=request.first_name,
-#             last_name=request.last_name,
-#             phone=request.phone,
-#         )
-
-#         return self.repo.create(user)
-    
 
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
@@ -43,9 +12,9 @@ password_hash = PasswordHash.recommended()
 
 class AuthService:
 
-    def __init__(self, db: Session):
+    def __init__(self, db: Session, user_repository: UserRepository,):
         self.db = db
-        self.user_repository = UserRepository(db)
+        self.user_repository = user_repository
 
     def signup(self, request: SignupRequest) -> User:
 
