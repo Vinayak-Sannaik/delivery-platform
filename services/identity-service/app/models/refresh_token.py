@@ -7,6 +7,11 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.db.base import Base
 from app.db.timestamp_mixin import TimestampMixin
 
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from app.models.user import User
+
 
 class RefreshToken(TimestampMixin, Base):
     __tablename__ = "refresh_tokens"
@@ -32,9 +37,21 @@ class RefreshToken(TimestampMixin, Base):
         nullable=False,
     )
 
+    revoked_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=True,
+    )
+
     is_revoked: Mapped[bool] = mapped_column(
         Boolean,
         default=False,
+        nullable=False,
+    )
+
+    jti: Mapped[UUID] = mapped_column(
+        String(36),
+        unique=True,
+        index=True,
         nullable=False,
     )
 

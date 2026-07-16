@@ -37,3 +37,4 @@ class UserRepository:
     def create(self, user: User) -> User:
         self.db.add(user)
         return user
+    

@@ -1,10 +1,12 @@
 from uuid import UUID, uuid4
 
 from sqlalchemy import Boolean, String
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
 from app.db.timestamp_mixin import TimestampMixin
+
+from app.models.refresh_token import RefreshToken
 
 class User(TimestampMixin, Base):
     __tablename__ = "users"
@@ -49,5 +51,10 @@ class User(TimestampMixin, Base):
         default=True,
         nullable=False,
     )
+
+    refresh_tokens: Mapped[list["RefreshToken"]] = relationship(
+    back_populates="user",
+    cascade="all, delete-orphan",
+)
 
     

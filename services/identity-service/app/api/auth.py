@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends
 
 from app.dependencies.services import get_auth_service 
 
-from app.schemas.user import SignupRequest, SignupResponse
+from app.schemas.user import SignupRequest, SignupResponse, LoginRequest, LoginResponse
 from app.services.auth_service import AuthService
 
 router = APIRouter(
@@ -26,3 +26,10 @@ def signup(
         first_name=user.first_name,
         last_name=user.last_name,
     )
+
+@router.post("/login", response_model=LoginResponse)
+def login(
+    request: LoginRequest,
+    service: AuthService = Depends(get_auth_service),
+):
+    return service.login(request)
