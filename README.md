@@ -244,7 +244,3 @@ This project demonstrates practical implementation of:
 - Distributed Systems
 
 ---
-
-# License
-
-This project is created for learning purposes and backend engineering interview preparation.

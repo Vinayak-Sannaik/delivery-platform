@@ -241,7 +241,3 @@ http://127.0.0.1:8000/redoc
 - Multi-Factor Authentication (MFA)
 
 ---
-
-## License
-
-This project is part of the Food Delivery Platform learning project.
