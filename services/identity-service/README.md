@@ -70,6 +70,10 @@ app/
 git clone <repository-url>
 cd services/identity-service
 ```
+### 2. Docker
+```bash
+docker compose up
+```
 
 ### 2. Create a virtual environment
 
