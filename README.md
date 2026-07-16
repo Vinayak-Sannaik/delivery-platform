@@ -1,25 +1,61 @@
-Food Delivery Platform (Swiggy/Zomato Inspired)
+# 🍔 Food Delivery Platform
 
-Overview
+A production-inspired microservices-based Food Delivery Platform built to learn and demonstrate backend engineering concepts such as distributed systems, API Gateway, authentication, asynchronous communication, caching, and containerized deployments.
 
-A production-grade food delivery platform built with FastAPI,
-React, and a microservices architecture. The goal is to
-implement real-world backend concepts including authentication,
-event-driven communication, caching, background jobs, real-time updates,
-containerization, observability, and cloud deployment.
+The project is designed using industry-standard architecture while remaining simple enough to understand and extend.
 
+---
 
+# 🚀 Live Services
+
+| Service | Status | Live |
+|----------|--------|------|
+| Identity Service | ✅ Live | https://delivery-platform-xo8w.onrender.com/docs |
+| Catalog Service | 🚧 In Progress | - |
+| Order Service | 📋 Planned | - |
+| Delivery Service | 📋 Planned | - |
+
+---
+
+# Architecture
+
+```text
+                        Client
+                           │
+                           ▼
+                     API Gateway
+                           │
+        ┌──────────────────┼──────────────────┐
+        ▼                  ▼                  ▼
+ Identity Service     Catalog Service    Order Service
+        │                  │                  │
+        └──────────────┬───┴──────────────┐
+                       ▼                  ▼
+                 Supabase PostgreSQL    Redis
+                                         │
+                                         ▼
+                                       Kafka
+                                         │
+                                         ▼
+                                 Delivery Service
+```
+
+---
+
+# Repository Structure
+
+```text
 food-delivery-platform/
 │
-├── frontend/
+├── frontend/                 # React Frontend
 │
-├── gateway/
+├── gateway/                  # API Gateway
 │
 ├── services/
-│   ├── identity-service/
-│   ├── catalog-service/
-│   ├── order-service/
-│   └── delivery-service/
+│   ├── identity-service/     # Authentication & Authorization
+│   ├── catalog-service/      # Restaurants, Menus & Food Items
+│   ├── order-service/        # Cart & Orders
+│   └── delivery-service/     # Delivery Partner Management
 │
 ├── infrastructure/
 │   ├── docker/
@@ -29,122 +65,186 @@ food-delivery-platform/
 │
 ├── docs/
 │
-├── .gitignore
-│
 ├── docker-compose.yml
 │
 └── README.md
+```
 
+---
 
-main.py
-    │
-    ▼
-router.py
-    │
-    ▼
-health.py
+# Technology Stack
 
-Not
-health.py
-↓
-main.py
+## Backend
 
+- Python
+- FastAPI
+- SQLAlchemy
+- Alembic
+- JWT Authentication
 
-Uvicorn
+## Database
 
-↓
+- PostgreSQL (Supabase)
 
-Imports app.main
+## Caching
 
-↓
+- Redis *(Planned)*
 
-Creates FastAPI App
+## Messaging
 
-↓
+- Kafka *(Planned)*
 
-Loads Settings
+## Frontend
 
-↓
+- React
+- TypeScript
 
-Includes Routers
+## Infrastructure
 
-↓
+- Docker
+- Docker Compose
+- Render
+- GitHub Actions *(Planned)*
 
-Starts HTTP Server
+---
 
-↓
+# Microservices
 
-Waiting for Requests
+## ✅ Identity Service
 
-Now request comes.
+Responsible for:
 
-GET /health
+- User Registration
+- Login
+- JWT Authentication
+- Refresh Tokens
+- Password Hashing
 
-↓
+Documentation:
 
-FastAPI Routing Table
+```
+services/identity-service
+```
 
-↓
+Live API:
 
-health.py
+https://delivery-platform-xo8w.onrender.com/docs
 
-↓
+---
 
-Return JSON
+## 🚧 Catalog Service
 
+Responsible for:
 
-Why do we create the SQLAlchemy Engine only once?
+- Restaurants
+- Menus
+- Food Categories
+- Food Items
+- Search
 
-A strong answer is:
+Status:
 
-"The Engine is a heavyweight object that manages the connection pool and database configuration. Creating multiple engines results in multiple connection pools, increased memory usage, inconsistent configuration, and can quickly exhaust the database's connection limit. Therefore, we create a single Engine during application startup and share it across the application."
+Under Development
 
+---
 
-Phase 1 – Foundation
-✅ FastAPI app
-✅ Configuration
-✅ Health endpoint
-✅ Dependency Injection
-⏳ Logging
-⏳ Exception handling
-Phase 2 – Database
-SQLAlchemy Engine
-Session
-Alembic
-User model
-Phase 3 – Authentication
-Signup
-Login
-JWT
-Refresh Tokens
-Password hashing
-Phase 4 – Production
-Docker
-PostgreSQL
-Redis
-Kafka
-Unit tests
-Integration tests
+## 📋 Order Service
 
+Responsible for:
 
-app/
+- Shopping Cart
+- Order Placement
+- Order Status
+- Payment Integration
 
-api/
-    auth.py
+Status:
 
-schemas/
-    user.py
+Planned
 
-repositories/
-    user_repository.py
+---
 
-services/
-    auth_service.py
+## 📋 Delivery Service
 
-models/
-    user.py
+Responsible for:
 
+- Delivery Partners
+- Order Assignment
+- Delivery Tracking
+- Notifications
 
+Status:
 
-generate: alembic revision --autogenerate -m "create refresh tokens table"
-run: alembic upgrade head
+Planned
+
+---
+
+# Features
+
+- Microservices Architecture
+- JWT Authentication
+- Layered Architecture
+- Repository Pattern
+- Dependency Injection
+- Alembic Database Migrations
+- Dockerized Services
+- API Gateway
+- PostgreSQL
+- Redis Caching *(Upcoming)*
+- Kafka Event Streaming *(Upcoming)*
+
+---
+
+# Running the Project
+
+Clone the repository
+
+```bash
+git clone https://github.com/<username>/food-delivery-platform.git
+
+cd food-delivery-platform
+```
+
+Start the services
+
+```bash
+docker compose up --build
+```
+
+---
+
+# Roadmap
+
+- [x] Identity Service
+- [ ] Catalog Service
+- [ ] Order Service
+- [ ] Delivery Service
+- [ ] API Gateway
+- [ ] Redis Integration
+- [ ] Kafka Integration
+- [ ] Background Jobs
+- [ ] Monitoring
+- [ ] CI/CD Pipeline
+- [ ] Kubernetes Deployment
+
+---
+
+# Learning Objectives
+
+This project demonstrates practical implementation of:
+
+- Microservices
+- REST APIs
+- Authentication & Authorization
+- Docker
+- Database Migrations
+- Clean Architecture
+- Dependency Injection
+- Repository Pattern
+- Event-Driven Architecture
+- Distributed Systems
+
+---
+
+# License
+
+This project is created for learning purposes and backend engineering interview preparation.
