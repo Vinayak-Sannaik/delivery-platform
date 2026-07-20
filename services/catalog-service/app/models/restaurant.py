@@ -1,14 +1,30 @@
 import uuid
 
-from sqlalchemy import Boolean, DateTime, String, Text, func
+from sqlalchemy import Boolean, DateTime, String, Text, func,Index, UniqueConstraint
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from app.models.category import Category
 
 
 class Restaurant(Base):
     __tablename__ = "restaurants"
+    __table_args__ = (
+        UniqueConstraint(
+            "owner_id",
+            "name",
+            name="uq_owner_restaurant_name",
+        ),
+        Index(
+            "ix_restaurants_owner_id",
+            "owner_id",
+        ),
+    )
 
     id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
@@ -61,4 +77,9 @@ class Restaurant(Base):
         DateTime(timezone=True),
         server_default=func.now(),
         onupdate=func.now(),
+    )
+
+    categories: Mapped[list["Category"]] = relationship(
+        back_populates="restaurant",
+        cascade="all, delete-orphan",
     )
