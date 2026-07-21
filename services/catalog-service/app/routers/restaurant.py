@@ -4,15 +4,17 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.dependencies.database import get_db
-from app.repositories.restaurant_repository import RestaurantRepository
 from app.schemas.restaurant import (
     RestaurantCreate,
     RestaurantResponse,
     RestaurantUpdate,
 )
 from app.services.restaurant_service import RestaurantService
+from app.schemas.auth import CurrentUser
+
 
 from app.dependencies.services import get_restaurant_service
+from app.dependencies.auth import get_current_user
 
 router = APIRouter(
     prefix="/restaurants",
@@ -28,9 +30,9 @@ router = APIRouter(
 def create_restaurant(
     restaurant: RestaurantCreate,
     service: RestaurantService = Depends(get_restaurant_service),
+    current_user: CurrentUser = Depends(get_current_user),
 ):
-    # TODO: Replace with authenticated user's ID from Gateway
-    owner_id = UUID("11111111-1111-1111-1111-111111111111")
+    owner_id = current_user.user_id
 
     return service.create(owner_id, restaurant)
 

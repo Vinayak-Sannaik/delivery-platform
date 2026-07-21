@@ -7,6 +7,9 @@ class Settings(BaseSettings):
     DEBUG: bool = True
 
     DATABASE_URL: str
+    
+    JWT_SECRET_KEY: str
+    JWT_ALGORITHM: str
 
     class Config:
         env_file = ".env"

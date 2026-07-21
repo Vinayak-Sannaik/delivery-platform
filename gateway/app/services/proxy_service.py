@@ -29,6 +29,13 @@ async def forward_request(
 
         # print("Downstream status:", response.status_code)
         # print("Downstream body:", response.text)
+        
+        print("=" * 50)
+        print("Incoming path:", request.url.path)
+        print("Captured path:", path)
+        print("Target URL:", target_url)
+        print("Method:", request.method)
+        print("=" * 50)
 
         return Response(
             content=response.content,
