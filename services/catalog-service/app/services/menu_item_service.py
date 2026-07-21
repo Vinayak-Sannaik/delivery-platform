@@ -9,6 +9,7 @@ from app.schemas.menu_item import CreateMenuItem, UpdateMenuItem
 from app.schemas.auth import CurrentUser
 from app.models.user import RoleEnum
 from app.models.restaurant import Restaurant
+from app.services.authorization_service import AuthorizationService
 
 
 class MenuItemService:
@@ -16,28 +17,29 @@ class MenuItemService:
         self,
         category_repo: CategoryRepository,
         menu_item_repo: MenuItemRepository,
+        authorization_service: AuthorizationService
     ):
         self.category_repo = category_repo
         self.menu_item_repo = menu_item_repo
-        
+        self.authorization_service = authorization_service
 
-    def _authorize_restaurant_owner(
-        self,
-        restaurant: Restaurant,
-        current_user: CurrentUser,
-    ) -> None:
-        # Admin can manage every restaurant
-        if current_user.role == RoleEnum.ADMIN:
-            return
+    # def _authorize_restaurant_owner(
+    #     self,
+    #     restaurant: Restaurant,
+    #     current_user: CurrentUser,
+    # ) -> None:
+    #     # Admin can manage every restaurant
+    #     if current_user.role == RoleEnum.ADMIN:
+    #         return
 
-        # Restaurant owner can manage only their own restaurant
-        if restaurant.owner_id == current_user.user_id:
-            return
+    #     # Restaurant owner can manage only their own restaurant
+    #     if restaurant.owner_id == current_user.user_id:
+    #         return
 
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="You are not authorized to perform this action on this restaurant.",
-        )
+    #     raise HTTPException(
+    #         status_code=status.HTTP_403_FORBIDDEN,
+    #         detail="You are not authorized to perform this action on this restaurant.",
+    #     )
         
 
     def create(
@@ -55,7 +57,7 @@ class MenuItemService:
                 detail="Category not found.",
             )
 
-        self._authorize_restaurant_owner(
+        self.authorization_service.authorize_restaurant_owner(
             category.restaurant,
             current_user,
         )
@@ -125,7 +127,7 @@ class MenuItemService:
 
         menu_item = self.get_by_id(menu_item_id)
 
-        self._authorize_restaurant_owner(
+        self.authorization_service.authorize_restaurant_owner(
             menu_item.category.restaurant,
             current_user,
         )
@@ -161,7 +163,7 @@ class MenuItemService:
     ) -> None:
 
         menu_item = self.get_by_id(menu_item_id)
-        self._authorize_restaurant_owner(
+        self.authorization_service.authorize_restaurant_owner(
             menu_item.category.restaurant,
             current_user,
         )

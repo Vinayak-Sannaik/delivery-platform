@@ -4,32 +4,39 @@ from fastapi import HTTPException, status
 
 from app.models.restaurant import Restaurant
 from app.repositories.restaurant_repository import RestaurantRepository
+from app.services.authorization_service import AuthorizationService
 from app.schemas.restaurant import RestaurantCreate, RestaurantUpdate
 from app.schemas.auth import CurrentUser
 from app.models.user import RoleEnum
 
+
 class RestaurantService:
-    def __init__(self, repository: RestaurantRepository):
-        self.repository = repository
-        
-    def _authorize_restaurant_owner(
+    def __init__(
         self,
-        restaurant: Restaurant,
-        current_user: CurrentUser,
-    ) -> None:
-        # Admin can manage every restaurant
-        if current_user.role == RoleEnum.ADMIN:
-            return
+        repository: RestaurantRepository,
+        authorization_service: AuthorizationService,
+    ):
+        self.repository = repository
+        self.authorization_service = authorization_service
 
-        # Restaurant owner can manage only their own restaurant
-        if restaurant.owner_id == current_user.user_id:
-            return
+    # def _authorize_restaurant_owner(
+    #     self,
+    #     restaurant: Restaurant,
+    #     current_user: CurrentUser,
+    # ) -> None:
+    #     # Admin can manage every restaurant
+    #     if current_user.role == RoleEnum.ADMIN:
+    #         return
 
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="You are not authorized to perform this action on this restaurant.",
-        )
-        
+    #     # Restaurant owner can manage only their own restaurant
+    #     if restaurant.owner_id == current_user.user_id:
+    #         return
+
+    #     raise HTTPException(
+    #         status_code=status.HTTP_403_FORBIDDEN,
+    #         detail="You are not authorized to perform this action on this restaurant.",
+    #     )
+
     def create(
         self,
         owner_id: UUID,
@@ -81,8 +88,8 @@ class RestaurantService:
         current_user: CurrentUser,
     ) -> Restaurant:
         restaurant = self.get_by_id(restaurant_id)
-        
-        self._authorize_restaurant_owner(
+
+        self.authorization_service.authorize_restaurant_owner(
             restaurant,
             current_user,
         )
@@ -101,7 +108,7 @@ class RestaurantService:
     ) -> None:
         restaurant = self.get_by_id(restaurant_id)
 
-        self._authorize_restaurant_owner(
+        self.authorization_service.authorize_restaurant_owner(
             restaurant,
             current_user,
         )

@@ -10,6 +10,7 @@ from app.schemas.category import CategoryCreate, CategoryUpdate
 from app.schemas.auth import CurrentUser
 from app.models.user import RoleEnum
 from app.models.restaurant import Restaurant
+from app.services.authorization_service import AuthorizationService
 
 
 
@@ -18,27 +19,29 @@ class CategoryService:
         self,
         category_repo: CategoryRepository,
         restaurant_repo: RestaurantRepository,
+        authorization_service: AuthorizationService
     ):
         self.category_repo = category_repo
         self.restaurant_repo = restaurant_repo
+        self.authorization_service = authorization_service
         
-    def _authorize_restaurant_owner(
-        self,
-        restaurant: Restaurant,
-        current_user: CurrentUser,
-    ) -> None:
-        # Admin can manage every restaurant and category
-        if current_user.role == RoleEnum.ADMIN:
-            return
+    # def authorization_service(
+    #     self,
+    #     restaurant: Restaurant,
+    #     current_user: CurrentUser,
+    # ) -> None:
+    #     # Admin can manage every restaurant and category
+    #     if current_user.role == RoleEnum.ADMIN:
+    #         return
 
-        # Restaurant owner can manage only their own restaurant
-        if restaurant.owner_id == current_user.user_id:
-            return
+    #     # Restaurant owner can manage only their own restaurant
+    #     if restaurant.owner_id == current_user.user_id:
+    #         return
 
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="You are not authorized to perform this action on this restaurant.",
-        )
+    #     raise HTTPException(
+    #         status_code=status.HTTP_403_FORBIDDEN,
+    #         detail="You are not authorized to perform this action on this restaurant.",
+    #     )
 
     def create(
         self,
@@ -54,16 +57,10 @@ class CategoryService:
                 detail="Restaurant not found.",
             )
 
-        self._authorize_restaurant_owner(
+        self.authorization_service.authorize_restaurant_owner(
             restaurant,
             current_user,
         )
-        
-        if restaurant is None:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Restaurant not found.",
-            )
 
         existing_category = self.category_repo.get_by_restaurant_and_name(
             restaurant_id=restaurant_id,
@@ -125,7 +122,7 @@ class CategoryService:
     ) -> Category:
         category = self.get_by_id(category_id)
 
-        self._authorize_restaurant_owner(
+        self.authorization_service.authorize_restaurant_owner(
             category.restaurant,
             current_user,
         )
@@ -164,7 +161,7 @@ class CategoryService:
         
         category = self.get_by_id(category_id)
         
-        self._authorize_restaurant_owner(
+        self.authorization_service.authorize_restaurant_owner(
                 category.restaurant,
                 current_user,
          )
