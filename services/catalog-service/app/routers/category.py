@@ -16,6 +16,9 @@ from app.schemas.menu_item import (
 from app.services.category_service import CategoryService
 from app.services.menu_item_service import MenuItemService
 
+from app.schemas.auth import CurrentUser
+from app.dependencies.authorization import require_restaurant_owner
+
 router = APIRouter(
     prefix="",
     tags=["Categories"],
@@ -31,10 +34,12 @@ def create_menu_item(
     category_id: UUID,
     menu_item: CreateMenuItem,
     service: MenuItemService = Depends(get_menu_item_service),
+    current_user: CurrentUser = Depends(require_restaurant_owner),
 ):
     return service.create(
         category_id=category_id,
         menu_item_data=menu_item,
+        current_user=current_user
     )
     
 @router.get(
@@ -63,10 +68,12 @@ def create_category(
     restaurant_id: UUID,
     category_data: CategoryCreate,
     service: CategoryService = Depends(get_category_service),
+    current_user: CurrentUser = Depends(require_restaurant_owner),
 ):
     return service.create(
         restaurant_id=restaurant_id,
         category_data=category_data,
+        current_user=current_user
     )
 
 

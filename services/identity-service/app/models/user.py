@@ -1,12 +1,19 @@
 from uuid import UUID, uuid4
 
-from sqlalchemy import Boolean, String
+from enum import Enum
+from sqlalchemy import Boolean, String, Enum as SQLEnum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
 from app.db.timestamp_mixin import TimestampMixin
 
 from app.models.refresh_token import RefreshToken
+
+class RoleEnum(str, Enum):
+    CUSTOMER = "CUSTOMER"
+    RESTAURANT_OWNER = "RESTAURANT_OWNER"
+    DELIVERY_PARTNER = "DELIVERY_PARTNER"
+    ADMIN = "ADMIN"
 
 class User(TimestampMixin, Base):
     __tablename__ = "users"
@@ -52,9 +59,17 @@ class User(TimestampMixin, Base):
         nullable=False,
     )
 
+    role: Mapped[RoleEnum] = mapped_column(
+        SQLEnum(RoleEnum, name="user_role"),
+        nullable=False,
+        default=RoleEnum.CUSTOMER
+    )
+    
     refresh_tokens: Mapped[list["RefreshToken"]] = relationship(
-    back_populates="user",
-    cascade="all, delete-orphan",
-)
+        back_populates="user",
+        cascade="all, delete-orphan",
+    )
+    
+
 
     

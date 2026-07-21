@@ -1,0 +1,7 @@
+from enum import Enum
+
+class RoleEnum(str, Enum):
+    CUSTOMER = "CUSTOMER"
+    RESTAURANT_OWNER = "RESTAURANT_OWNER"
+    DELIVERY_PARTNER = "DELIVERY_PARTNER"
+    ADMIN = "ADMIN"

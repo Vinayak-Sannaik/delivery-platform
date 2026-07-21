@@ -5,12 +5,31 @@ from fastapi import HTTPException, status
 from app.models.restaurant import Restaurant
 from app.repositories.restaurant_repository import RestaurantRepository
 from app.schemas.restaurant import RestaurantCreate, RestaurantUpdate
-
+from app.schemas.auth import CurrentUser
+from app.models.user import RoleEnum
 
 class RestaurantService:
     def __init__(self, repository: RestaurantRepository):
         self.repository = repository
+        
+    def _authorize_restaurant_owner(
+        self,
+        restaurant: Restaurant,
+        current_user: CurrentUser,
+    ) -> None:
+        # Admin can manage every restaurant
+        if current_user.role == RoleEnum.ADMIN:
+            return
 
+        # Restaurant owner can manage only their own restaurant
+        if restaurant.owner_id == current_user.user_id:
+            return
+
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You are not authorized to perform this action on this restaurant.",
+        )
+        
     def create(
         self,
         owner_id: UUID,
@@ -59,8 +78,14 @@ class RestaurantService:
         self,
         restaurant_id: UUID,
         restaurant_data: RestaurantUpdate,
+        current_user: CurrentUser,
     ) -> Restaurant:
         restaurant = self.get_by_id(restaurant_id)
+        
+        self._authorize_restaurant_owner(
+            restaurant,
+            current_user,
+        )
 
         update_data = restaurant_data.model_dump(exclude_unset=True)
 
@@ -72,6 +97,13 @@ class RestaurantService:
     def delete(
         self,
         restaurant_id: UUID,
+        current_user: CurrentUser,
     ) -> None:
         restaurant = self.get_by_id(restaurant_id)
+
+        self._authorize_restaurant_owner(
+            restaurant,
+            current_user,
+        )
+
         self.repository.delete(restaurant)

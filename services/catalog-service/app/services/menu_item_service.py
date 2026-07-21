@@ -6,6 +6,9 @@ from app.models.menu_item import MenuItem
 from app.repositories.category_repository import CategoryRepository
 from app.repositories.menu_item_repository import MenuItemRepository
 from app.schemas.menu_item import CreateMenuItem, UpdateMenuItem
+from app.schemas.auth import CurrentUser
+from app.models.user import RoleEnum
+from app.models.restaurant import Restaurant
 
 
 class MenuItemService:
@@ -16,11 +19,32 @@ class MenuItemService:
     ):
         self.category_repo = category_repo
         self.menu_item_repo = menu_item_repo
+        
+
+    def _authorize_restaurant_owner(
+        self,
+        restaurant: Restaurant,
+        current_user: CurrentUser,
+    ) -> None:
+        # Admin can manage every restaurant
+        if current_user.role == RoleEnum.ADMIN:
+            return
+
+        # Restaurant owner can manage only their own restaurant
+        if restaurant.owner_id == current_user.user_id:
+            return
+
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You are not authorized to perform this action on this restaurant.",
+        )
+        
 
     def create(
         self,
         category_id: UUID,
         menu_item_data: CreateMenuItem,
+        current_user: CurrentUser
     ) -> MenuItem:
 
         category = self.category_repo.get_by_id(category_id)
@@ -31,6 +55,10 @@ class MenuItemService:
                 detail="Category not found.",
             )
 
+        self._authorize_restaurant_owner(
+            category.restaurant,
+            current_user,
+        )
         existing_menu_item = self.menu_item_repo.get_by_category_and_name(
             category_id=category_id,
             name=menu_item_data.name,
@@ -92,9 +120,15 @@ class MenuItemService:
         self,
         menu_item_id: UUID,
         menu_item_data: UpdateMenuItem,
+        current_user: CurrentUser
     ) -> MenuItem:
 
         menu_item = self.get_by_id(menu_item_id)
+
+        self._authorize_restaurant_owner(
+            menu_item.category.restaurant,
+            current_user,
+        )
 
         if (
             menu_item_data.name
@@ -123,7 +157,12 @@ class MenuItemService:
     def delete(
         self,
         menu_item_id: UUID,
+        current_user: CurrentUser
     ) -> None:
 
         menu_item = self.get_by_id(menu_item_id)
+        self._authorize_restaurant_owner(
+            menu_item.category.restaurant,
+            current_user,
+        )
         self.menu_item_repo.delete(menu_item)

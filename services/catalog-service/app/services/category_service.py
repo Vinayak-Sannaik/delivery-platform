@@ -7,6 +7,11 @@ from app.repositories.category_repository import CategoryRepository
 from app.repositories.restaurant_repository import RestaurantRepository
 from app.schemas.category import CategoryCreate, CategoryUpdate
 
+from app.schemas.auth import CurrentUser
+from app.models.user import RoleEnum
+from app.models.restaurant import Restaurant
+
+
 
 class CategoryService:
     def __init__(
@@ -16,14 +21,44 @@ class CategoryService:
     ):
         self.category_repo = category_repo
         self.restaurant_repo = restaurant_repo
+        
+    def _authorize_restaurant_owner(
+        self,
+        restaurant: Restaurant,
+        current_user: CurrentUser,
+    ) -> None:
+        # Admin can manage every restaurant and category
+        if current_user.role == RoleEnum.ADMIN:
+            return
+
+        # Restaurant owner can manage only their own restaurant
+        if restaurant.owner_id == current_user.user_id:
+            return
+
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You are not authorized to perform this action on this restaurant.",
+        )
 
     def create(
         self,
         restaurant_id: UUID,
         category_data: CategoryCreate,
+        current_user: CurrentUser
     ) -> Category:
         restaurant = self.restaurant_repo.get_by_id(restaurant_id)
+        
+        if restaurant is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Restaurant not found.",
+            )
 
+        self._authorize_restaurant_owner(
+            restaurant,
+            current_user,
+        )
+        
         if restaurant is None:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
@@ -86,9 +121,15 @@ class CategoryService:
         self,
         category_id: UUID,
         category_data: CategoryUpdate,
+        current_user: CurrentUser
     ) -> Category:
         category = self.get_by_id(category_id)
 
+        self._authorize_restaurant_owner(
+            category.restaurant,
+            current_user,
+        )
+        
         if (
             category_data.name
             and category_data.name != category.name
@@ -110,12 +151,21 @@ class CategoryService:
 
         for key, value in update_data.items():
             setattr(category, key, value)
+            
+        
 
         return self.category_repo.update(category)
 
     def delete(
         self,
         category_id: UUID,
+        current_user: CurrentUser
     ) -> None:
+        
         category = self.get_by_id(category_id)
+        
+        self._authorize_restaurant_owner(
+                category.restaurant,
+                current_user,
+         )
         self.category_repo.delete(category)

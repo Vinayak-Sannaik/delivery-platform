@@ -14,7 +14,7 @@ from app.schemas.auth import CurrentUser
 
 
 from app.dependencies.services import get_restaurant_service
-from app.dependencies.auth import get_current_user
+from app.dependencies.authorization import require_restaurant_owner
 
 router = APIRouter(
     prefix="/restaurants",
@@ -30,7 +30,7 @@ router = APIRouter(
 def create_restaurant(
     restaurant: RestaurantCreate,
     service: RestaurantService = Depends(get_restaurant_service),
-    current_user: CurrentUser = Depends(get_current_user),
+    current_user: CurrentUser = Depends(require_restaurant_owner),
 ):
     owner_id = current_user.user_id
 
@@ -68,8 +68,9 @@ def update_restaurant(
     restaurant_id: UUID,
     restaurant: RestaurantUpdate,
     service: RestaurantService = Depends(get_restaurant_service),
+    current_user: CurrentUser = Depends(require_restaurant_owner),
 ):
-    return service.update(restaurant_id, restaurant)
+    return service.update(restaurant_id, restaurant, current_user)
 
 
 @router.delete(
@@ -79,5 +80,6 @@ def update_restaurant(
 def delete_restaurant(
     restaurant_id: UUID,
     service: RestaurantService = Depends(get_restaurant_service),
+    current_user: CurrentUser = Depends(require_restaurant_owner),
 ):
-    service.delete(restaurant_id)
+    service.delete(restaurant_id, current_user)

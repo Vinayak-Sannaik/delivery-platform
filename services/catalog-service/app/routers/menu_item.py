@@ -9,6 +9,9 @@ from app.schemas.menu_item import (
 from app.services.menu_item_service import MenuItemService
 from app.dependencies.menu_item import get_menu_item_service
 
+from app.schemas.auth import CurrentUser
+from app.dependencies.authorization import require_restaurant_owner
+
 router = APIRouter(
     prefix="/menu-items",
     tags=["Menu Items"],
@@ -76,10 +79,12 @@ def update_menu_item(
     menu_item_id: UUID,
     menu_item: UpdateMenuItem,
     service: MenuItemService = Depends(get_menu_item_service),
+    current_user: CurrentUser = Depends(require_restaurant_owner),
 ):
     return service.update(
         menu_item_id=menu_item_id,
         menu_item_data=menu_item,
+        current_user=current_user,
     )
 
 
@@ -90,5 +95,7 @@ def update_menu_item(
 def delete_menu_item(
     menu_item_id: UUID,
     service: MenuItemService = Depends(get_menu_item_service),
+    current_user: CurrentUser = Depends(require_restaurant_owner)
 ):
-    service.delete(menu_item_id)
+    service.delete(menu_item_id, current_user)
+    
