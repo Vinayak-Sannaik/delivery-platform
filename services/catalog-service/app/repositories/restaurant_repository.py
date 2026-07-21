@@ -1,9 +1,11 @@
 from uuid import UUID
 
-from sqlalchemy import select
+from sqlalchemy import select, or_
 from sqlalchemy.orm import Session
 
 from app.models.restaurant import Restaurant
+from app.models.menu_item import MenuItem
+from app.models.category import Category
 
 
 class RestaurantRepository:
@@ -52,4 +54,28 @@ class RestaurantRepository:
         self.db.delete(restaurant)
         self.db.commit()
         return True
+    
+    def search(
+        self,
+        restaurant_id: UUID,
+        query: str,
+        skip: int = 0,
+        limit: int = 10,
+    ) -> list[MenuItem]:
+        
+        stmt = (
+            select(MenuItem).join(Category)
+            .where(
+                MenuItem.restaurant_id == restaurant_id,
+                or_(
+                    MenuItem.name.ilike(f"%{query}%"),
+                    MenuItem.description.ilike(f"%{query}%"),
+                ),
+            )
+            .order_by(MenuItem.created_at.desc())
+            .offset(skip)
+            .limit(limit)
+        )
+        
+        return list(self.db.scalars(stmt).all())
 

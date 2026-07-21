@@ -2,6 +2,7 @@ from fastapi import FastAPI
 
 from app.routers.restaurant import router as restaurant_router
 from app.routers.category import router as category_router
+from app.routers.menu_item import router as menu_item_router
 
 app = FastAPI(
     title="Catalog Service",
@@ -10,6 +11,7 @@ app = FastAPI(
 
 app.include_router(restaurant_router)
 app.include_router(category_router)
+app.include_router(menu_item_router)
 
 
 @app.get("/health")

@@ -1,32 +1,39 @@
 # id
-# restaurant_id
+# restaurant_id (FK)
+
 # name
+# description
+
+# price
+
+# is_available
+
 # created_at
 # updated_at
 
 from app.core.database import Base
 import uuid
-from sqlalchemy import DateTime, String, func, ForeignKey, Index, UniqueConstraint
+from decimal import Decimal
+from sqlalchemy import DateTime, String, Numeric, Boolean, func, ForeignKey, Index, UniqueConstraint
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from app.models.restaurant import Restaurant
-    from app.models.menu_item import MenuItem
+    from app.models.category import Category
 
-class Category(Base):
-    __tablename__ = 'categories'
+class MenuItem(Base):
+    __tablename__ = 'menu_items'
     __table_args__ = (
         UniqueConstraint(
-            "restaurant_id",
+            "category_id",
             "name",
-            name="uq_restaurant_category_name",
+            name="uq_category_menu_item_name",
         ),
         Index(
-            "ix_categories_restaurant_id",
-            "restaurant_id",
+            "ix_menu_items_category_id",
+            "category_id",
         ),
     )
 
@@ -36,13 +43,16 @@ class Category(Base):
         default=uuid.uuid4,
     )
 
-    restaurant_id: Mapped[uuid.UUID] = mapped_column(
+    category_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
-        ForeignKey('restaurants.id', ondelete="CASCADE"),
+        ForeignKey('categories.id', ondelete="CASCADE"),
         nullable=False
     )
 
     name: Mapped[str] = mapped_column(String(255), nullable=False)
+    description: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    price : Mapped[Decimal] = mapped_column(Numeric(10, 2), nullable=False)
+    is_available: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
 
     created_at: Mapped[DateTime] = mapped_column(
         DateTime(timezone=True),
@@ -55,11 +65,6 @@ class Category(Base):
         onupdate=func.now(),
     )
 
-    restaurant: Mapped["Restaurant"] = relationship(
-        back_populates="categories",
-    )
-    
-    menu_items: Mapped[list["MenuItem"]] = relationship(
-        back_populates="category",
-        cascade="all, delete-orphan",
+    category: Mapped["Category"] = relationship(
+        back_populates="menu_items",
     )

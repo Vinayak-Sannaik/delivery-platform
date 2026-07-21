@@ -3,17 +3,55 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, Query, status
 
 from app.dependencies.category import get_category_service
+from app.dependencies.menu_item import get_menu_item_service
 from app.schemas.category import (
     CategoryCreate,
     CategoryResponse,
     CategoryUpdate,
 )
+from app.schemas.menu_item import (
+    CreateMenuItem,
+    MenuItemResponse
+)
 from app.services.category_service import CategoryService
+from app.services.menu_item_service import MenuItemService
 
 router = APIRouter(
     prefix="",
     tags=["Categories"],
 )
+
+
+@router.post(
+    "/{category_id}/menu_items",
+    response_model=MenuItemResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+def create_menu_item(
+    category_id: UUID,
+    menu_item: CreateMenuItem,
+    service: MenuItemService = Depends(get_menu_item_service),
+):
+    return service.create(
+        category_id=category_id,
+        menu_item_data=menu_item,
+    )
+    
+@router.get(
+    "/{category_id}/menu_items",
+    response_model=list[MenuItemResponse],
+)
+def list_menu_items(
+    category_id: UUID,
+    skip: int = Query(default=0, ge=0),
+    limit: int = Query(default=10, ge=1, le=100),
+    service: MenuItemService = Depends(get_menu_item_service),
+):
+    return service.list_by_category(
+        category_id=category_id,
+        skip=skip,
+        limit=limit,
+    )
 
 
 @router.post(

@@ -10,6 +10,7 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from app.models.category import Category
+    from app.models.menu_item import MenuItem
 
 
 class Restaurant(Base):
