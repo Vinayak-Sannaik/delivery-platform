@@ -79,7 +79,7 @@ class AuthService:
         ):
             raise InvalidCredentialsException()
 
-        access_token = create_access_token(str(user.id))
+        access_token = create_access_token(str(user.id), user.role)
 
         refresh_token, jti = create_refresh_token(str(user.id))
 
