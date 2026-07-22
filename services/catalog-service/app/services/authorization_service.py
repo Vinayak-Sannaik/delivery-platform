@@ -21,5 +21,5 @@ class AuthorizationService:
 
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="You are not authorized to perform this action.",
+            detail="You are not authorized to perform this action..",
         )
