@@ -10,6 +10,7 @@ from app.schemas.auth import CurrentUser
 from app.models.user import RoleEnum
 from app.models.restaurant import Restaurant
 from app.services.authorization_service import AuthorizationService
+from decimal import Decimal
 
 
 class MenuItemService:
@@ -100,6 +101,10 @@ class MenuItemService:
     def list_by_category(
         self,
         category_id: UUID,
+        name : str | None = None,
+        is_available : bool | None = None,
+        min_price: Decimal | None = None,
+        max_price: Decimal | None = None,
         skip: int = 0,
         limit: int = 10,
     ) -> list[MenuItem]:
@@ -114,6 +119,10 @@ class MenuItemService:
 
         return self.menu_item_repo.get_all(
             category_id=category_id,
+            name = name,
+            is_available = is_available,
+            min_price = min_price,
+            max_price = max_price,
             skip=skip,
             limit=limit,
         )

@@ -76,10 +76,12 @@ class RestaurantService:
 
     def get_all(
         self,
+        name: str | None = None,
+        is_active: bool | None = None,
         skip: int = 0,
         limit: int = 10,
     ) -> list[Restaurant]:
-        return self.repository.get_all(skip=skip, limit=limit)
+        return self.repository.get_all(name = name, is_active = is_active, skip=skip, limit=limit)
 
     def update(
         self,

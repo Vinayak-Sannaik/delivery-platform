@@ -42,11 +42,13 @@ def create_restaurant(
     response_model=list[RestaurantResponse],
 )
 def get_restaurants(
+    name: str | None = None,
+    is_active: bool | None = None,
     skip: int = 0,
     limit: int = 10,
     service: RestaurantService = Depends(get_restaurant_service),
 ):
-    return service.get_all(skip, limit)
+    return service.get_all(name, is_active, skip, limit)
 
 
 @router.get(

@@ -4,6 +4,7 @@ from sqlalchemy import select, or_
 from sqlalchemy.orm import Session
 
 from app.models.menu_item import MenuItem
+from decimal import Decimal
 
 
 class MenuItemRepository:
@@ -34,15 +35,41 @@ class MenuItemRepository:
     def get_all(
         self,
         category_id: UUID,
+        name : str | None = None,
+        is_available : bool | None = None,
+        min_price: Decimal | None = None,
+        max_price: Decimal | None = None,
         skip: int = 0,
         limit: int = 10,
     ) -> list[MenuItem]:
+        stmt = select(MenuItem).where(
+    MenuItem.category_id == category_id
+)
+
+        if name:
+            stmt = stmt.where(
+                MenuItem.name.ilike(f"%{name}%")
+            )
+
+        if is_available is not None:
+            stmt = stmt.where(
+                MenuItem.is_available == is_available
+            )
+
+        if min_price is not None:
+            stmt = stmt.where(
+                MenuItem.price >= min_price
+            )
+
+        if max_price is not None:
+            stmt = stmt.where(
+                MenuItem.price <= max_price
+            )
+
         stmt = (
-            select(MenuItem)
-            .where(MenuItem.category_id == category_id)
-            .order_by(MenuItem.created_at.desc())
-            .offset(skip)
-            .limit(limit)
+            stmt.order_by(MenuItem.created_at.desc())
+                .offset(skip)
+                .limit(limit)
         )
 
         return list(self.db.scalars(stmt).all())

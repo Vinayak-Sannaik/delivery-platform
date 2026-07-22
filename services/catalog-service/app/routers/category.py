@@ -19,6 +19,8 @@ from app.services.menu_item_service import MenuItemService
 from app.schemas.auth import CurrentUser
 from app.dependencies.authorization import require_restaurant_owner
 
+from decimal import Decimal
+
 router = APIRouter(
     prefix="",
     tags=["Categories"],
@@ -48,12 +50,20 @@ def create_menu_item(
 )
 def list_menu_items(
     category_id: UUID,
+    name : str | None = None,
+    is_available : bool | None = None,
+    min_price: Decimal | None = None,
+    max_price: Decimal | None = None,
     skip: int = Query(default=0, ge=0),
     limit: int = Query(default=10, ge=1, le=100),
     service: MenuItemService = Depends(get_menu_item_service),
 ):
     return service.list_by_category(
         category_id=category_id,
+        name = name,
+        is_available = is_available,
+        min_price = min_price,
+        max_price = max_price,
         skip=skip,
         limit=limit,
     )

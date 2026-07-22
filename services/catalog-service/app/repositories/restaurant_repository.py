@@ -35,14 +35,21 @@ class RestaurantRepository:
 
     def get_all(
         self,
+        name: str | None = None,
+        is_active: bool | None = None,
         skip: int = 0,
         limit: int = 10,
     ) -> list[Restaurant]:
-        stmt = (
-            select(Restaurant)
-            .offset(skip)
-            .limit(limit)
-        )
+        
+        stmt = (select(Restaurant))
+        
+        if name:
+            stmt = stmt.where(Restaurant.name.ilike(f"%{name}%"))
+        if is_active is not None:
+            stmt = stmt.where(Restaurant.is_active == is_active)
+    
+        stmt = stmt.offset(skip).limit(limit)
+            
         return list(self.db.scalars(stmt).all())
 
     def update(self, restaurant: Restaurant) -> Restaurant:
