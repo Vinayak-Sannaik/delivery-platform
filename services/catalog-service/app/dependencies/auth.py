@@ -12,12 +12,12 @@ def get_current_user(
     credentials: HTTPAuthorizationCredentials = Depends(security),
 ) -> CurrentUser:
     
-    print("Catalog: Validating JWT")
+    # print("Catalog: Validating JWT")
 
     try:
         payload = verify_access_token(credentials.credentials)
         
-        print("Current user---->", payload)
+        # print("Current user---->", payload)
 
         return CurrentUser(
             user_id=payload["sub"],

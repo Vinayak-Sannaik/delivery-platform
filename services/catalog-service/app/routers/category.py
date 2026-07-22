@@ -123,10 +123,12 @@ def update_category(
     category_id: UUID,
     category_data: CategoryUpdate,
     service: CategoryService = Depends(get_category_service),
+    current_user: CurrentUser = Depends(require_restaurant_owner),
 ):
     return service.update(
         category_id=category_id,
         category_data=category_data,
+        current_user=current_user
     )
 
 
