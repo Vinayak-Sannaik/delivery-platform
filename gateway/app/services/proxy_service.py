@@ -43,8 +43,9 @@ async def forward_request(
             media_type=response.headers.get("content-type"),
         )
 
-    except httpx.RequestError as e:
+    except Exception as e:
+        print("PROXY ERROR:", repr(e))
         raise HTTPException(
-            status_code=503,
-            detail=str(e),
+            status_code=502,
+            detail=str(e)
         )
