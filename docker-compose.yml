@@ -1,0 +1,102 @@
+services:
+
+  identity-postgres:
+    image: postgres:17
+    container_name: identity-postgres
+
+    environment:
+      POSTGRES_DB: identity_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+
+    ports:
+      - "5432:5432"
+
+    volumes:
+      - identity_postgres_data:/var/lib/postgresql/data
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d identity_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+
+  catalog-postgres:
+    image: postgres:17
+    container_name: catalog-postgres
+
+    environment:
+      POSTGRES_DB: catalog_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+
+    ports:
+      - "5433:5432"
+
+    volumes:
+      - catalog_postgres_data:/var/lib/postgresql/data
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d catalog_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+
+  identity-service:
+    build:
+      context: ./services/identity-service
+
+    container_name: identity-service
+
+    ports:
+      - "8001:8000"
+
+    env_file:
+      - ./services/identity-service/.env
+
+    depends_on:
+      identity-postgres:
+        condition: service_healthy
+
+
+  catalog-service:
+    build:
+      context: ./services/catalog-service
+
+    container_name: catalog-service
+
+    ports:
+      - "8002:8000"
+
+    env_file:
+      - ./services/catalog-service/.env
+
+    depends_on:
+      catalog-postgres:
+        condition: service_healthy
+
+
+  gateway:
+    build:
+      context: ./gateway
+
+    container_name: gateway
+
+    ports:
+      - "8000:8000"
+
+    env_file:
+      - ./gateway/.env
+
+    depends_on:
+      - identity-service
+      - catalog-service
+
+
+volumes:
+
+  identity_postgres_data:
+
+  catalog_postgres_data:
