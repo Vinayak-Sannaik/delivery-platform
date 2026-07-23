@@ -1,11 +1,10 @@
 import logging
-from fastapi import HTTPException, Request, Response
-import httpx
 
-# 1. Instantiate the logger ONCE at the module level
+import httpx
+from fastapi import HTTPException, Request, Response
+
 logger = logging.getLogger(__name__)
 
-# Timeout configuration
 TIMEOUT = httpx.Timeout(60.0)
 
 
@@ -13,77 +12,60 @@ async def forward_request(
     request: Request,
     target_base_url: str,
     path: str,
-    client: httpx.AsyncClient | None = None,
 ) -> Response:
     target_url = f"{target_base_url.rstrip('/')}/{path.lstrip('/')}"
 
-    # Build safe proxy headers (exclude host header to let HTTPX calculate it)
-    headers = {
-        k: v for k, v in request.headers.items() 
-        if k.lower() not in ("host", "content-length")
-    }
+    body = await request.body()
 
-    # Use structured logging instead of print()
-    logger.info(
-        "Proxying request | path=%s | target_url=%s | method=%s",
-        request.url.path,
-        target_url,
-        request.method,
-    )
+    headers = {}
+
+    if content_type := request.headers.get("content-type"):
+        headers["content-type"] = content_type
+
+    if authorization := request.headers.get("authorization"):
+        headers["authorization"] = authorization
+
+    if accept := request.headers.get("accept"):
+        headers["accept"] = accept
+
+    logger.info("=" * 50)
+    logger.info("Incoming path: %s", request.url.path)
+    logger.info("Captured path: %s", path)
+    logger.info("Target URL: %s", target_url)
+    logger.info("Method: %s", request.method)
+    logger.info("=" * 50)
 
     try:
-        # Use provided client or a temporary client block
-        async_client = client or httpx.AsyncClient(timeout=TIMEOUT)
-        
-        # If client was passed in, don't use 'async with' (avoid closing shared client)
-        if client:
-            response = await async_client.request(
+        async with httpx.AsyncClient(timeout=TIMEOUT, follow_redirects=True) as client:
+            response = await client.request(
                 method=request.method,
                 url=target_url,
                 headers=headers,
                 params=request.query_params,
-                content=await request.body(),
+                content=body,
             )
-        else:
-            async with async_client:
-                response = await async_client.request(
-                    method=request.method,
-                    url=target_url,
-                    headers=headers,
-                    params=request.query_params,
-                    content=await request.body(),
-                )
-                
-        print("=" * 50)
-        print("Incoming path:", request.url.path)
-        print("Captured path:", path)
-        print("Target URL:", target_url)
-        print("Method:", request.method)
-        print("=" * 50)
-        
-        print("DOWNSTREAM STATUS:", response.status_code)
-        print("DOWNSTREAM BODY:", response.text)
+
+        logger.info("Downstream status: %s", response.status_code)
+        logger.info("Downstream body: %s", response.text)
 
         return Response(
             content=response.content,
             status_code=response.status_code,
-            headers={
-                k: v for k, v in response.headers.items() 
-                if k.lower() not in ("content-length", "transfer-encoding")
-            },
             media_type=response.headers.get("content-type"),
         )
 
-    except httpx.RequestError as exc:
-        print("HTTPX ERROR:", repr(exc))
-        logger.exception("Gateway proxy network error target_url=%s", target_url)
+    except httpx.HTTPError as exc:
+        logger.exception("HTTPX exception while proxying")
+
         raise HTTPException(
             status_code=502,
-            detail=f"Bad Gateway: Unable to reach downstream service ({type(exc).__name__})",
+            detail=f"Gateway could not reach downstream service: {type(exc).__name__}",
         )
+
     except Exception:
-        logger.exception("Unexpected error in gateway proxy")
+        logger.exception("Unexpected gateway error")
+
         raise HTTPException(
             status_code=500,
-            detail="Internal Gateway Error",
+            detail="Internal gateway error",
         )
