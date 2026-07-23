@@ -46,7 +46,7 @@ async def forward_request(
             )
 
         logger.info("Downstream status: %s", response.status_code)
-        logger.info("Downstream body: %s", response.text)
+        # logger.info("Downstream body: %s", response.text)
 
         return Response(
             content=response.content,
