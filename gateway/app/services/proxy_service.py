@@ -60,6 +60,9 @@ async def forward_request(
         print("Target URL:", target_url)
         print("Method:", request.method)
         print("=" * 50)
+        
+        print("DOWNSTREAM STATUS:", response.status_code)
+        print("DOWNSTREAM BODY:", response.text)
 
         return Response(
             content=response.content,
@@ -72,6 +75,7 @@ async def forward_request(
         )
 
     except httpx.RequestError as exc:
+        print("HTTPX ERROR:", repr(exc))
         logger.exception("Gateway proxy network error target_url=%s", target_url)
         raise HTTPException(
             status_code=502,
