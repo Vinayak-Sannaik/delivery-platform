@@ -53,6 +53,13 @@ async def forward_request(
                     params=request.query_params,
                     content=await request.body(),
                 )
+                
+        print("=" * 50)
+        print("Incoming path:", request.url.path)
+        print("Captured path:", path)
+        print("Target URL:", target_url)
+        print("Method:", request.method)
+        print("=" * 50)
 
         return Response(
             content=response.content,
