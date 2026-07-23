@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Request
 from sqlalchemy.orm import Session
 
 from app.dependencies.database import get_db
@@ -28,13 +28,14 @@ router = APIRouter(
     status_code=201,
 )
 def create_restaurant(
+    request: Request,
     restaurant: RestaurantCreate,
     service: RestaurantService = Depends(get_restaurant_service),
     current_user: CurrentUser = Depends(require_restaurant_owner),
 ):
     owner_id = current_user.user_id
 
-    return service.create(owner_id, restaurant)
+    return service.create(owner_id, restaurant, request=request,)
 
 
 @router.get(

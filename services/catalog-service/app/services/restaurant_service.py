@@ -1,11 +1,12 @@
 from uuid import UUID
 
-from fastapi import HTTPException, status
+from fastapi import HTTPException, status, Request
 
 from app.models.restaurant import Restaurant
 from app.repositories.restaurant_repository import RestaurantRepository
 from app.services.authorization_service import AuthorizationService
 from app.schemas.restaurant import RestaurantCreate, RestaurantUpdate
+from app.repositories.idempotency_repository import IdempotencyRepository
 from app.schemas.auth import CurrentUser
 from app.models.user import RoleEnum
 
@@ -15,9 +16,11 @@ class RestaurantService:
         self,
         repository: RestaurantRepository,
         authorization_service: AuthorizationService,
+        idempotency_repository: IdempotencyRepository
     ):
         self.repository = repository
         self.authorization_service = authorization_service
+        self.idempotency_repository = idempotency_repository
 
     # def _authorize_restaurant_owner(
     #     self,
@@ -41,7 +44,22 @@ class RestaurantService:
         self,
         owner_id: UUID,
         restaurant_data: RestaurantCreate,
+        request: Request
     ) -> Restaurant:
+        
+        idempotency_key = request.headers.get("idempotency-key")
+        
+        if idempotency_key:
+            existing_key = self.idempotency_repository.get_by_key(
+                idempotency_key
+            )
+            
+            if existing_key:
+                raise HTTPException(
+                    status_code=status.HTTP_409_CONFLICT,
+                    detail="Duplicate idempotency key.",
+                )
+            
         existing_restaurant = self.repository.get_by_owner_and_name(
             owner_id=owner_id,
             name=restaurant_data.name,

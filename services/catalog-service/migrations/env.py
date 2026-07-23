@@ -39,6 +39,7 @@ def include_object(object, name, type_, reflected, compare_to):
         "restaurants",
         "categories",
         "menu_items",
+        "idempotency_keys"
     }
 
     if type_ == "table":
