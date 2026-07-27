@@ -121,5 +121,13 @@ class MenuItemRepository:
             )
             .order_by(MenuItem.created_at.desc())
         )
-        
-        return list(self.db.scalars(stmt).all())
+
+        result = self.db.scalars(stmt)
+        return list(result.all())
+
+    def get_by_ids(
+        self,
+        menu_item_ids: list[UUID],
+    ) -> list[MenuItem]:
+        stmt = select(MenuItem).where(MenuItem.id.in_(menu_item_ids))
+        return self.db.scalars(stmt).all()

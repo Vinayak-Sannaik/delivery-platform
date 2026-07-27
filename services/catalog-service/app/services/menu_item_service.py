@@ -1,4 +1,5 @@
 from uuid import UUID
+from decimal import Decimal
 
 from fastapi import HTTPException, status
 
@@ -7,10 +8,7 @@ from app.repositories.category_repository import CategoryRepository
 from app.repositories.menu_item_repository import MenuItemRepository
 from app.schemas.menu_item import CreateMenuItem, UpdateMenuItem
 from app.schemas.auth import CurrentUser
-from app.models.user import RoleEnum
-from app.models.restaurant import Restaurant
 from app.services.authorization_service import AuthorizationService
-from decimal import Decimal
 
 
 class MenuItemService:
@@ -47,7 +45,7 @@ class MenuItemService:
         self,
         category_id: UUID,
         menu_item_data: CreateMenuItem,
-        current_user: CurrentUser
+        current_user: CurrentUser,
     ) -> MenuItem:
 
         category = self.category_repo.get_by_id(category_id)
@@ -101,8 +99,8 @@ class MenuItemService:
     def list_by_category(
         self,
         category_id: UUID,
-        name : str | None = None,
-        is_available : bool | None = None,
+        name: str | None = None,
+        is_available: bool | None = None,
         min_price: Decimal | None = None,
         max_price: Decimal | None = None,
         skip: int = 0,
@@ -119,10 +117,10 @@ class MenuItemService:
 
         return self.menu_item_repo.get_all(
             category_id=category_id,
-            name = name,
-            is_available = is_available,
-            min_price = min_price,
-            max_price = max_price,
+            name=name,
+            is_available=is_available,
+            min_price=min_price,
+            max_price=max_price,
             skip=skip,
             limit=limit,
         )
@@ -131,7 +129,7 @@ class MenuItemService:
         self,
         menu_item_id: UUID,
         menu_item_data: UpdateMenuItem,
-        current_user: CurrentUser
+        current_user: CurrentUser,
     ) -> MenuItem:
 
         menu_item = self.get_by_id(menu_item_id)
@@ -168,7 +166,7 @@ class MenuItemService:
     def delete(
         self,
         menu_item_id: UUID,
-        current_user: CurrentUser
+        current_user: CurrentUser,
     ) -> None:
 
         menu_item = self.get_by_id(menu_item_id)
@@ -177,3 +175,9 @@ class MenuItemService:
             current_user,
         )
         self.menu_item_repo.delete(menu_item)
+
+    def get_menu_items_by_ids(
+        self,
+        menu_item_ids: list[UUID],
+    ) -> list[MenuItem]:
+        return self.menu_item_repo.get_by_ids(menu_item_ids)
