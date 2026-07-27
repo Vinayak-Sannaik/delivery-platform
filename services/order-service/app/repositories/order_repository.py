@@ -52,8 +52,16 @@ class OrderRepository:
         Flush changes to an existing order.
         """
         await self.db.flush()
-        await self.db.refresh(order)
-        return order
+
+        stmt = (
+            select(Order)
+            .options(selectinload(Order.items))
+            .where(Order.id == order.id)
+        )
+
+        result = await self.db.execute(stmt)
+
+        return result.scalar_one()
     
     async def get_by_customer(
         self,

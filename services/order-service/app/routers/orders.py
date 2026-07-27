@@ -11,6 +11,8 @@ from uuid import UUID
 from fastapi import Depends, Query
 from app.schemas.order import UpdateOrderRequest
 
+from fastapi import Header
+
 router = APIRouter(
     prefix="/orders",
     tags=["Orders"],
@@ -24,12 +26,14 @@ router = APIRouter(
 )
 async def create_order(
     request: CreateOrderRequest,
+    idempotency_key: str = Header(...),
     current_user: CurrentUser = Depends(get_current_user),
     service: OrderService = Depends(get_order_service),
 ):
     return await service.create(
         request=request,
         customer_id=current_user.user_id,
+        idempotency_key=idempotency_key
     )
     
 

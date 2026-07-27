@@ -15,6 +15,7 @@ from app.schemas.auth import CurrentUser
 from app.schemas.order import UpdateOrderRequest
 from app.services.order_status_service import is_valid_transition
 from app.models.status_enum import OrderStatus
+from app.repositories.idempotency_repository import IdempotencyRepository
 
 class OrderService:
     def __init__(
@@ -22,18 +23,38 @@ class OrderService:
         order_repository: OrderRepository,
         order_item_repository: OrderItemRepository,
         catalog_client: CatalogClient,
+        idempotency_repository: IdempotencyRepository,
         db: AsyncSession
     ):
         self.order_repository = order_repository
         self.order_item_repository = order_item_repository
         self.catalog_client = catalog_client
+        self.idempotency_repository = idempotency_repository
         self.db = db
 
     async def create(
         self,
         request: CreateOrderRequest,
         customer_id: UUID,
+        idempotency_key: str,
     ) -> Order:
+        
+        existing = await self.idempotency_repository.get_by_key(
+            idempotency_key
+        )
+
+        if existing:
+            if existing.customer_id != customer_id:
+                raise HTTPException(
+                    status_code=status.HTTP_409_CONFLICT,
+                    detail="Idempotency key already used by another customer.",
+                )
+
+            order = await self.order_repository.get_by_id(
+                existing.order_id
+            )
+
+            return order
 
         menu_item_ids = [
             item.menu_item_id
@@ -117,9 +138,17 @@ class OrderService:
 
             await self.order_item_repository.create_many(order_items)
 
+            await self.idempotency_repository.create(
+                key=idempotency_key,
+                customer_id=customer_id,
+                order_id=order.id,
+            )
+
             await self.db.commit()
 
-            await self.db.refresh(order)
+            order = await self.order_repository.get_by_id(
+                order.id
+            )
 
             return order
 
@@ -201,6 +230,16 @@ class OrderService:
                 pass
 
             case RoleEnum.RESTAURANT_OWNER:
+                owner_id = await self.catalog_client.get_restaurant_owner(
+                    order.restaurant_id
+                )
+
+                if owner_id != str(current_user.user_id):
+                    raise HTTPException(
+                        status_code=status.HTTP_403_FORBIDDEN,
+                        detail="You can only update orders from your own restaurant.",
+                    )
+
                 allowed_statuses = {
                     OrderStatus.CONFIRMED,
                     OrderStatus.PREPARING,
@@ -244,7 +283,9 @@ class OrderService:
 
         await self.db.commit()
 
-        await self.db.refresh(order)
+        order = await self.order_repository.get_by_id(
+            order.id
+        )
 
         return order
     
@@ -284,6 +325,8 @@ class OrderService:
 
         await self.db.commit()
 
-        await self.db.refresh(order)
+        order = await self.order_repository.get_by_id(
+            order.id
+        )
 
         return order
