@@ -1,7 +1,7 @@
 import grpc
 
 from app.grpc.catalog_service import CatalogServiceServicer
-from app.grpc.generated import catalog_pb2_grpc
+from app.grpc import catalog_pb2_grpc
 
 
 async def start_grpc_server():

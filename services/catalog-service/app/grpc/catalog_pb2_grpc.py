@@ -3,8 +3,7 @@
 import grpc
 import warnings
 
-# import catalog_pb2 as catalog__pb2
-from generated import catalog_pb2 as catalog__pb2
+from app.grpc import catalog_pb2 as catalog__pb2
 
 GRPC_GENERATED_VERSION = '1.83.0'
 GRPC_VERSION = grpc.__version__
@@ -40,12 +39,23 @@ class CatalogServiceStub:
                 request_serializer=catalog__pb2.GetMenuItemsRequest.SerializeToString,
                 response_deserializer=catalog__pb2.GetMenuItemsResponse.FromString,
                 _registered_method=True)
+        self.GetRestaurantOwner = channel.unary_unary(
+                '/catalog.CatalogService/GetRestaurantOwner',
+                request_serializer=catalog__pb2.GetRestaurantOwnerRequest.SerializeToString,
+                response_deserializer=catalog__pb2.GetRestaurantOwnerResponse.FromString,
+                _registered_method=True)
 
 
 class CatalogServiceServicer:
     """Missing associated documentation comment in .proto file."""
 
     def GetMenuItems(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def GetRestaurantOwner(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -58,6 +68,11 @@ def add_CatalogServiceServicer_to_server(servicer, server):
                     servicer.GetMenuItems,
                     request_deserializer=catalog__pb2.GetMenuItemsRequest.FromString,
                     response_serializer=catalog__pb2.GetMenuItemsResponse.SerializeToString,
+            ),
+            'GetRestaurantOwner': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetRestaurantOwner,
+                    request_deserializer=catalog__pb2.GetRestaurantOwnerRequest.FromString,
+                    response_serializer=catalog__pb2.GetRestaurantOwnerResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -87,6 +102,33 @@ class CatalogService:
             '/catalog.CatalogService/GetMenuItems',
             catalog__pb2.GetMenuItemsRequest.SerializeToString,
             catalog__pb2.GetMenuItemsResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def GetRestaurantOwner(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/catalog.CatalogService/GetRestaurantOwner',
+            catalog__pb2.GetRestaurantOwnerRequest.SerializeToString,
+            catalog__pb2.GetRestaurantOwnerResponse.FromString,
             options,
             channel_credentials,
             insecure,

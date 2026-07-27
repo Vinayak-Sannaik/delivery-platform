@@ -5,6 +5,9 @@ package catalog;
 service CatalogService {
     rpc GetMenuItems(GetMenuItemsRequest)
         returns (GetMenuItemsResponse);
+
+    rpc GetRestaurantOwner(GetRestaurantOwnerRequest)
+        returns (GetRestaurantOwnerResponse);
 }
 
 message GetMenuItemsRequest {
@@ -21,4 +24,12 @@ message MenuItem {
 
 message GetMenuItemsResponse {
     repeated MenuItem menu_items = 1;
+}
+
+message GetRestaurantOwnerRequest {
+    string restaurant_id = 1;
+}
+
+message GetRestaurantOwnerResponse {
+    string owner_id = 1;
 }

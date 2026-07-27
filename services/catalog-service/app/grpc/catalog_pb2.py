@@ -24,7 +24,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\rcatalog.proto\x12\x07\x63\x61talog\",\n\x13GetMenuItemsRequest\x12\x15\n\rmenu_item_ids\x18\x01 \x03(\t\"`\n\x08MenuItem\x12\n\n\x02id\x18\x01 \x01(\t\x12\x15\n\rrestaurant_id\x18\x02 \x01(\t\x12\x0c\n\x04name\x18\x03 \x01(\t\x12\r\n\x05price\x18\x04 \x01(\t\x12\x14\n\x0cis_available\x18\x05 \x01(\x08\"=\n\x14GetMenuItemsResponse\x12%\n\nmenu_items\x18\x01 \x03(\x0b\x32\x11.catalog.MenuItem2]\n\x0e\x43\x61talogService\x12K\n\x0cGetMenuItems\x12\x1c.catalog.GetMenuItemsRequest\x1a\x1d.catalog.GetMenuItemsResponseb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\rcatalog.proto\x12\x07\x63\x61talog\",\n\x13GetMenuItemsRequest\x12\x15\n\rmenu_item_ids\x18\x01 \x03(\t\"`\n\x08MenuItem\x12\n\n\x02id\x18\x01 \x01(\t\x12\x15\n\rrestaurant_id\x18\x02 \x01(\t\x12\x0c\n\x04name\x18\x03 \x01(\t\x12\r\n\x05price\x18\x04 \x01(\t\x12\x14\n\x0cis_available\x18\x05 \x01(\x08\"=\n\x14GetMenuItemsResponse\x12%\n\nmenu_items\x18\x01 \x03(\x0b\x32\x11.catalog.MenuItem\"2\n\x19GetRestaurantOwnerRequest\x12\x15\n\rrestaurant_id\x18\x01 \x01(\t\".\n\x1aGetRestaurantOwnerResponse\x12\x10\n\x08owner_id\x18\x01 \x01(\t2\xbc\x01\n\x0e\x43\x61talogService\x12K\n\x0cGetMenuItems\x12\x1c.catalog.GetMenuItemsRequest\x1a\x1d.catalog.GetMenuItemsResponse\x12]\n\x12GetRestaurantOwner\x12\".catalog.GetRestaurantOwnerRequest\x1a#.catalog.GetRestaurantOwnerResponseb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -37,6 +37,10 @@ if not _descriptor._USE_C_DESCRIPTORS:
   _globals['_MENUITEM']._serialized_end=168
   _globals['_GETMENUITEMSRESPONSE']._serialized_start=170
   _globals['_GETMENUITEMSRESPONSE']._serialized_end=231
-  _globals['_CATALOGSERVICE']._serialized_start=233
-  _globals['_CATALOGSERVICE']._serialized_end=326
+  _globals['_GETRESTAURANTOWNERREQUEST']._serialized_start=233
+  _globals['_GETRESTAURANTOWNERREQUEST']._serialized_end=283
+  _globals['_GETRESTAURANTOWNERRESPONSE']._serialized_start=285
+  _globals['_GETRESTAURANTOWNERRESPONSE']._serialized_end=331
+  _globals['_CATALOGSERVICE']._serialized_start=334
+  _globals['_CATALOGSERVICE']._serialized_end=522
 # @@protoc_insertion_point(module_scope)
