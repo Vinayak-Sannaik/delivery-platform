@@ -4,6 +4,7 @@ from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 
 from app.db.base import Base
+from app.models.order import Order
 from app.core.config import settings
 
 target_metadata = Base.metadata
@@ -34,6 +35,15 @@ target_metadata = Base.metadata
 # my_important_option = config.get_main_option("my_important_option")
 # ... etc.
 
+SERVICE_SCHEMA = "orders"
+
+def include_object(object, name, type_, reflected, compare_to):
+    if type_ == "table":
+        return getattr(object, "schema", None) == SERVICE_SCHEMA
+
+    return True
+
+
 
 def run_migrations_offline() -> None:
     """Run migrations in 'offline' mode.
@@ -51,6 +61,8 @@ def run_migrations_offline() -> None:
     context.configure(
         url=url,
         target_metadata=target_metadata,
+        include_object=include_object,
+        include_schemas=True,
         version_table="order_alembic_version",
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
@@ -75,10 +87,12 @@ def run_migrations_online() -> None:
 
     with connectable.connect() as connection:
         context.configure(
+            connection=connection,
+            target_metadata=target_metadata,
+            include_object=include_object,
             version_table="order_alembic_version",
-            connection=connection, target_metadata=target_metadata
+            include_schemas=True,
         )
-
         with context.begin_transaction():
             context.run_migrations()
 

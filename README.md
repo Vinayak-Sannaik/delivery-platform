@@ -86,6 +86,30 @@ food-delivery-platform/
 
 - PostgreSQL (Supabase)
 
+---
+
+## Database Migrations
+
+Create migration
+
+```bash
+alembic revision --autogenerate -m "migration message"
+```
+
+Apply migrations
+
+```bash
+alembic upgrade head
+```
+
+Rollback last migration
+
+```bash
+alembic downgrade -1
+```
+
+---
+
 ## Caching
 
 - Redis *(Planned)*
