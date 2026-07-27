@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package catalog;
+
+service CatalogService {
+    rpc GetMenuItems(GetMenuItemsRequest)
+        returns (GetMenuItemsResponse);
+}
+
+message GetMenuItemsRequest {
+    repeated string menu_item_ids = 1;
+}
+
+message MenuItem {
+    string id = 1;
+    string restaurant_id = 2;
+    string name = 3;
+    string price = 4;
+    bool is_available = 5;
+}
+
+message GetMenuItemsResponse {
+    repeated MenuItem menu_items = 1;
+}
