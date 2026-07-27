@@ -9,6 +9,7 @@ from app.grpc import catalog_pb2_grpc
 from app.repositories.category_repository import CategoryRepository
 from app.repositories.menu_item_repository import MenuItemRepository
 from app.repositories.restaurant_repository import RestaurantRepository
+from app.repositories.idempotency_repository import IdempotencyRepository
 from app.services.authorization_service import AuthorizationService
 from app.services.menu_item_service import MenuItemService
 from app.services.restaurant_service import RestaurantService
@@ -60,8 +61,13 @@ class CatalogServiceServicer(catalog_pb2_grpc.CatalogServiceServicer):
 
         try:
             restaurant_repo = RestaurantRepository(db)
+            idempotency_repo = IdempotencyRepository(db)
+            authorization_service = AuthorizationService()
+
             restaurant_service = RestaurantService(
                 repository=restaurant_repo,
+                authorization_service=authorization_service,
+                idempotency_repository=idempotency_repo,
             )
 
             try:
