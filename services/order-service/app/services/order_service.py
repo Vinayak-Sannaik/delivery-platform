@@ -16,6 +16,7 @@ from app.schemas.order import UpdateOrderRequest
 from app.services.order_status_service import is_valid_transition
 from app.models.status_enum import OrderStatus
 from app.repositories.idempotency_repository import IdempotencyRepository
+from app.services.outbox_service import OutboxService
 
 class OrderService:
     def __init__(
@@ -24,12 +25,16 @@ class OrderService:
         order_item_repository: OrderItemRepository,
         catalog_client: CatalogClient,
         idempotency_repository: IdempotencyRepository,
+        
+        outbox_service: OutboxService,
+    
         db: AsyncSession
     ):
         self.order_repository = order_repository
         self.order_item_repository = order_item_repository
         self.catalog_client = catalog_client
         self.idempotency_repository = idempotency_repository
+        self.outbox_service = outbox_service
         self.db = db
 
     async def create(
@@ -143,6 +148,8 @@ class OrderService:
                 customer_id=customer_id,
                 order_id=order.id,
             )
+            
+            await self.outbox_service.create_order_created(order)
 
             await self.db.commit()
 
@@ -280,6 +287,8 @@ class OrderService:
         order.status = request.status
 
         await self.order_repository.update(order)
+        
+        await self.outbox_service.create_order_status_updated(order)
 
         await self.db.commit()
 
@@ -322,6 +331,8 @@ class OrderService:
         order.status = OrderStatus.CANCELLED
 
         await self.order_repository.update(order)
+        
+        await self.outbox_service.create_order_cancelled(order)
 
         await self.db.commit()
 
