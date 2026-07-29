@@ -3,6 +3,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
+from app.clients.catalog_http_client import CatalogHttpClient
 from app.core.database import AsyncSessionLocal
 from app.kafka.producer import KafkaProducer
 from app.routers.orders import router as order_router
@@ -11,6 +12,9 @@ from app.workers.outbox_worker import OutboxWorker
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    catalog_client = CatalogHttpClient()
+    app.state.catalog_client = catalog_client
+
     kafka_producer = KafkaProducer()
     await kafka_producer.start()
 
@@ -32,6 +36,7 @@ async def lifespan(app: FastAPI):
             pass
 
         await kafka_producer.stop()
+        await catalog_client.close()
 
 
 app = FastAPI(
