@@ -37,6 +37,10 @@ async def forward_request(
     if authorization := request.headers.get("authorization"):
         headers["authorization"] = authorization
 
+    if hasattr(request.state, "user"):
+        headers["x-user-id"] = request.state.user["sub"]
+        headers["x-user-role"] = request.state.user["role"]
+
     if accept := request.headers.get("accept"):
         headers["accept"] = accept
 
