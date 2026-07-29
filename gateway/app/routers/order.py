@@ -5,14 +5,14 @@ from app.services.proxy_service import forward_request
 
 
 router = APIRouter(
-    prefix="/api/orders",
+    prefix="/orders",
     tags=["Order Service"],
 )
 
 
 @router.api_route(
     "/{path:path}",
-    methods=["GET", "POST", "PUT", "PATCH", "DELETE"],
+    methods=["GET", "POST", "PUT, PATCH", "DELETE"],
 )
 async def proxy_order(
     path: str,
