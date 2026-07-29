@@ -4,15 +4,16 @@ import grpc
 
 from app.grpc import catalog_pb2
 from app.grpc import catalog_pb2_grpc
-
+from app.core.config import settings
 
 class CatalogClient:
 
     def __init__(
         self,
-        host: str = "localhost:50051",
     ):
-        self.channel = grpc.aio.insecure_channel(host)
+        print("CATALOG GRPC ADDRESS:", settings.CATALOG_GRPC_ADDRESS)
+
+        self.channel = grpc.aio.insecure_channel(settings.CATALOG_GRPC_ADDRESS)
 
         self.stub = catalog_pb2_grpc.CatalogServiceStub(
             self.channel
