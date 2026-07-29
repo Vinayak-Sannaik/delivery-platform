@@ -44,7 +44,7 @@ class CatalogServiceServicer(catalog_pb2_grpc.CatalogServiceServicer):
                 menu_items=[
                     catalog_pb2.MenuItem(
                         id=str(item.id),
-                        restaurant_id=str(item.restaurant_id),
+                        restaurant_id=str(item.category.restaurant_id),
                         name=item.name,
                         price=str(item.price),
                         is_available=item.is_available,

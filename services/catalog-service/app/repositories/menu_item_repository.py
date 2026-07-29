@@ -6,6 +6,9 @@ from sqlalchemy.orm import Session
 from app.models.menu_item import MenuItem
 from decimal import Decimal
 
+from sqlalchemy import select
+from sqlalchemy.orm import selectinload
+
 
 class MenuItemRepository:
     def __init__(self, db: Session):
@@ -129,5 +132,10 @@ class MenuItemRepository:
         self,
         menu_item_ids: list[UUID],
     ) -> list[MenuItem]:
-        stmt = select(MenuItem).where(MenuItem.id.in_(menu_item_ids))
+        stmt = (
+            select(MenuItem)
+            .options(selectinload(MenuItem.category))
+            .where(MenuItem.id.in_(menu_item_ids))
+        )
+
         return self.db.scalars(stmt).all()

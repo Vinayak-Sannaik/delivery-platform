@@ -5,6 +5,9 @@ from app.core.config import settings
 
 
 def verify_access_token(token: str) -> dict:
+    print("Verifying access token...")
+    print(settings.JWT_SECRET_KEY)
+    print(token)
     try:
         payload = jwt.decode(
             token,
