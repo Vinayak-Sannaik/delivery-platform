@@ -9,6 +9,7 @@ class Settings(BaseSettings):
     
     CATALOG_GRPC_ADDRESS: str = "host.docker.internal:50051"
     
+    KAFKA_SSL_CA_LOCATION: str = "certs/aiven-ca.pem"
     KAFKA_BOOTSTRAP_SERVERS: str = "localhost:9092"
     KAFKA_USERNAME: str | None = None
     KAFKA_PASSWORD: str | None = None
