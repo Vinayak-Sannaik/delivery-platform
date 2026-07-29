@@ -10,6 +10,9 @@ class Settings(BaseSettings):
     CATALOG_GRPC_ADDRESS: str = "host.docker.internal:50051"
     
     KAFKA_BOOTSTRAP_SERVERS: str = "localhost:9092"
+    
+    CATALOG_SERVICE_URL: str
+    CATALOG_MODE: str
 
     model_config = SettingsConfigDict(
         env_file=".env",

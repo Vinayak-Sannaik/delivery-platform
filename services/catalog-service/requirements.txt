@@ -19,3 +19,6 @@ typing-inspection==0.4.2
 typing_extensions==4.16.0
 uvicorn==0.51.0
 PyJWT
+grpcio==1.83.0
+grpcio-tools==1.83.0
+protobuf==7.35.1

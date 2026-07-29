@@ -1,6 +1,8 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import Depends
+from app.core.config import settings
 
+from app.clients.catalog_http_client import CatalogHttpClient
 from app.clients.catalog_client import CatalogClient
 from app.core.database import get_db
 from app.repositories.idempotency_repository import IdempotencyRepository
@@ -9,6 +11,7 @@ from app.repositories.order_repository import OrderRepository
 from app.repositories.outbox_repository import OutboxRepository
 from app.services.order_service import OrderService
 from app.services.outbox_service import OutboxService
+
 
 
 async def get_order_service(
@@ -26,7 +29,10 @@ async def get_order_service(
         outbox_repository=outbox_repository,
     )
 
-    catalog_client = CatalogClient()
+    if settings.CATALOG_MODE == "http":
+        catalog_client = CatalogHttpClient()
+    else:
+        catalog_client = CatalogClient()
 
     return OrderService(
         order_repository=order_repository,
