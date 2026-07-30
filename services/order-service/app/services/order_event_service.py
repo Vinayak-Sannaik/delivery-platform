@@ -25,7 +25,7 @@ class OrderEventService:
             raise ValueError("Order not found")
 
         if event_type == "DeliveryAssigned":
-            order.status = OrderStatus.ASSIGNED
+            order.status = OrderStatus.READY
 
         elif event_type == "DeliveryCancelled":
             order.status = OrderStatus.CANCELLED
