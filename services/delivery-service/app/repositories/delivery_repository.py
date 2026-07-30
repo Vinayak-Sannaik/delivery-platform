@@ -39,3 +39,20 @@ class DeliveryRepository:
         await self.db.refresh(delivery)
 
         return delivery
+    
+    async def get_by_partner_id(
+        self,
+        delivery_partner_id,
+        skip: int = 0,
+        limit: int = 10,
+    ):
+        result = await self.db.execute(
+            select(Delivery)
+            .where(
+                Delivery.delivery_partner_id == delivery_partner_id
+            )
+            .offset(skip)
+            .limit(limit)
+        )
+
+        return result.scalars().all()
