@@ -21,5 +21,5 @@ async def proxy_order(
     return await forward_request(
         request=request,
         target_base_url=settings.ORDER_SERVICE_URL,
-        path=f"/{path}",
+        path=f"/orders/{path}" if path else "/orders",
     )
