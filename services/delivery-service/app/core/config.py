@@ -12,6 +12,7 @@ class Settings(BaseSettings):
     KAFKA_PASSWORD: str | None = None
     KAFKA_SECURITY_PROTOCOL: str = "PLAINTEXT"
     KAFKA_SASL_MECHANISM: str | None = None
+    KAFKA_SSL_CA_LOCATION: str | None = None
 
     model_config = SettingsConfigDict(
         env_file=".env",

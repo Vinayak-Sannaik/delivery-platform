@@ -1,0 +1,1 @@
+DELIVERY_TOPIC = "delivery-events"

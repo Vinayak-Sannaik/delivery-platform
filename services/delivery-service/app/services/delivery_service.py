@@ -2,6 +2,7 @@ from app.models.delivery import Delivery
 from app.models.delivery_status import DeliveryStatus
 from app.repositories.delivery_repository import DeliveryRepository
 from app.schemas.order_created_event import OrderCreatedEvent
+from app.services.outbox_service import OutboxService
 
 from app.schemas.auth import CurrentUser
 from app.models.user import RoleEnum
@@ -26,8 +27,10 @@ class DeliveryService:
     def __init__(
         self,
         delivery_repository: DeliveryRepository,
+        outbox_service: OutboxService,
     ):
         self.delivery_repository = delivery_repository
+        self.outbox_service = outbox_service
 
     async def create_from_order(
         self,
@@ -127,6 +130,16 @@ class DeliveryService:
             )
 
         delivery.status = status
+        await self.outbox_service.create_event(
+            aggregate_type="Delivery",
+            aggregate_id=delivery.id,
+            event_type="DeliveryStatusChanged",
+            payload={
+                "delivery_id": str(delivery.id),
+                "order_id": str(delivery.order_id),
+                "status": status.value,
+            },
+        )
 
         updated_delivery = await self.delivery_repository.update(
             delivery
@@ -166,6 +179,20 @@ class DeliveryService:
 
         delivery.delivery_partner_id = delivery_partner_id
         delivery.status = DeliveryStatus.ASSIGNED
+        
+        await self.outbox_service.create_event(
+            aggregate_type="Delivery",
+            aggregate_id=delivery.id,
+            event_type="DeliveryAssigned",
+            payload={
+                "delivery_id": str(delivery.id),
+                "order_id": str(delivery.order_id),
+                "delivery_partner_id": str(
+                    delivery_partner_id
+                ),
+                "status": delivery.status.value,
+            },
+        )
 
         updated_delivery = await self.delivery_repository.update(
             delivery
@@ -225,6 +252,17 @@ class DeliveryService:
             )
 
         delivery.status = DeliveryStatus.CANCELLED
+        
+        await self.outbox_service.create_event(
+            aggregate_type="Delivery",
+            aggregate_id=delivery.id,
+            event_type="DeliveryCancelled",
+            payload={
+                "delivery_id": str(delivery.id),
+                "order_id": str(delivery.order_id),
+                "status": delivery.status.value,
+            },
+        )
 
         updated_delivery = await self.delivery_repository.update(
             delivery

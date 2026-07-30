@@ -4,33 +4,76 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
 from app.consumers.order_created_consumer import OrderCreatedConsumer
+from app.kafka.producer import KafkaProducer
+from app.workers.outbox_worker import OutboxWorker
+from app.core.database import AsyncSessionLocal
 from app.routers.deliveries import router as delivery_router
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     consumer = OrderCreatedConsumer()
-    
-    consumer_task = asyncio.create_task(
-        consumer.start()
+
+    kafka_producer = KafkaProducer()
+
+    outbox_worker = OutboxWorker(
+        session_factory=AsyncSessionLocal,
+        kafka_producer=kafka_producer,
     )
 
-    try:
-        yield
-    finally:
-        consumer_task.cancel()
+    consumer_task = None
+    worker_task = None
 
-        try:
-            await consumer_task
-        except asyncio.CancelledError:
-            pass
-        
+    try:
+        # Start Kafka producer
+        await kafka_producer.start()
+
+        # Start order-created consumer
+        consumer_task = asyncio.create_task(
+            consumer.start()
+        )
+
+        # Start outbox worker
+        worker_task = asyncio.create_task(
+            outbox_worker.start()
+        )
+
+        yield
+
+    finally:
+        # Stop order consumer
+        if consumer_task:
+            consumer_task.cancel()
+
+            try:
+                await consumer_task
+            except asyncio.CancelledError:
+                pass
+
+        # Stop outbox worker
+        await outbox_worker.stop()
+
+        if worker_task:
+            worker_task.cancel()
+
+            try:
+                await worker_task
+            except asyncio.CancelledError:
+                pass
+
+        # Stop Kafka producer
+        await kafka_producer.stop()
+
+
 app = FastAPI(
     title="Delivery Service",
     version="1.0.0",
     lifespan=lifespan,
 )
 
+
 app.include_router(delivery_router)
+
 
 @app.get("/health")
 async def health():

@@ -9,6 +9,9 @@ from app.repositories.delivery_repository import DeliveryRepository
 from app.schemas.order_created_event import OrderCreatedEvent
 from app.services.delivery_service import DeliveryService
 
+from app.repositories.outbox_repository import OutboxRepository
+from app.services.outbox_service import OutboxService
+
 import logging
 
 logger = logging.getLogger(__name__)
@@ -57,8 +60,15 @@ class OrderCreatedConsumer:
                 )
 
                 async with AsyncSessionLocal() as db:
+                    outbox_repository = OutboxRepository(db)
+
+                    outbox_service = OutboxService(
+                        outbox_repository=outbox_repository,
+                    )
+
                     service = DeliveryService(
                         delivery_repository=DeliveryRepository(db),
+                        outbox_service=outbox_service,
                     )
 
                     await service.create_from_order(event)
