@@ -4,7 +4,7 @@ from app.core.config import settings
 from app.services.proxy_service import forward_request
 
 router = APIRouter(
-    prefix="/api",
+    prefix="/api/catalog",
     tags=["Catalog"],
 )
 
