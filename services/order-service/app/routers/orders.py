@@ -18,7 +18,6 @@ router = APIRouter(
     tags=["Orders"],
 )
 
-
 @router.post(
     "",
     response_model=OrderResponse,
@@ -36,21 +35,6 @@ async def create_order(
         idempotency_key=idempotency_key
     )
     
-
-@router.get(
-    "/{order_id}",
-    response_model=OrderResponse,
-)
-async def get_order(
-    order_id: UUID,
-    current_user: CurrentUser = Depends(get_current_user),
-    service: OrderService = Depends(get_order_service),
-):
-    return await service.get_by_id(
-        order_id,
-        current_user,
-    )
-    
 @router.get(
     "/me",
     response_model=list[OrderResponse],
@@ -66,6 +50,21 @@ async def get_my_orders(
         skip=skip,
         limit=limit,
     )
+
+@router.get(
+    "/{order_id}",
+    response_model=OrderResponse,
+)
+async def get_order(
+    order_id: UUID,
+    current_user: CurrentUser = Depends(get_current_user),
+    service: OrderService = Depends(get_order_service),
+):
+    return await service.get_by_id(
+        order_id,
+        current_user,
+    )
+    
     
 @router.patch(
     "/{order_id}/status",

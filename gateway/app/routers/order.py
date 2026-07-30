@@ -12,7 +12,7 @@ router = APIRouter(
 
 @router.api_route(
     "/{path:path}",
-    methods=["GET", "POST", "PUT, PATCH", "DELETE"],
+    methods=["GET", "POST", "PUT", "PATCH", "DELETE"]
 )
 async def proxy_order(
     path: str,
