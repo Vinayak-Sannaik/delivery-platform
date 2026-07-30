@@ -7,6 +7,9 @@ from app.core.database import AsyncSessionLocal
 from app.repositories.order_repository import OrderRepository
 from app.services.order_service import OrderService
 
+import logging
+
+logger = logging.getLogger(__name__)
 
 class DeliveryEventConsumer:
 
@@ -30,6 +33,10 @@ class DeliveryEventConsumer:
                     "Delivery event received:",
                     message.value,
                 )
+                logger.info(
+                    "Kafka message received at order service: %s",
+                    message.value,
+                )
 
                 event = message.value
 
@@ -39,6 +46,11 @@ class DeliveryEventConsumer:
 
                     service = OrderService(
                         order_repository=repository,
+                    )
+                    
+                    logger.info(
+                        "Delivery assigned created for order: %s",
+                        event.order_id,
                     )
 
                     await service.handle_delivery_event(

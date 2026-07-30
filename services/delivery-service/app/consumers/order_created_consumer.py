@@ -77,8 +77,6 @@ class OrderCreatedConsumer:
                         "Delivery created for order: %s",
                         event.order_id,
                     )
-                    print("Delivery created for order: %s",
-                        event.order_id,)
 
                     await db.commit()
 
