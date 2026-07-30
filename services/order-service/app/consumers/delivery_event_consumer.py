@@ -7,7 +7,7 @@ from aiokafka import AIOKafkaConsumer
 from app.core.config import settings
 from app.core.database import AsyncSessionLocal
 from app.repositories.order_repository import OrderRepository
-from app.services.order_service import OrderService
+from app.services.order_event_service import OrderEventService
 
 logger = logging.getLogger(__name__)
 
@@ -64,13 +64,23 @@ class DeliveryEventConsumer:
                 async with AsyncSessionLocal() as db:
                     repository = OrderRepository(db)
 
-                    service = OrderService(
+                    # service = OrderService(
+                    #     order_repository=repository,
+                    # )
+
+                    # await service.handle_delivery_event(
+                    #     event
+                    # )
+
+                    # await db.commit()
+                    
+                    repository = OrderRepository(db)
+
+                    service = OrderEventService(
                         order_repository=repository,
                     )
 
-                    await service.handle_delivery_event(
-                        event
-                    )
+                    await service.handle_delivery_event(event)
 
                     await db.commit()
 
