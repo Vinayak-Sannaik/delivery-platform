@@ -50,7 +50,7 @@ class DeliveryEventConsumer:
         try:
             async for message in self.consumer:
                 logger.info(
-                    "Delivery event received: %s",
+                    "Delivery event received:- %s",
                     message.value,
                 )
 
@@ -63,16 +63,6 @@ class DeliveryEventConsumer:
 
                 async with AsyncSessionLocal() as db:
                     repository = OrderRepository(db)
-
-                    # service = OrderService(
-                    #     order_repository=repository,
-                    # )
-
-                    # await service.handle_delivery_event(
-                    #     event
-                    # )
-
-                    # await db.commit()
                     
                     repository = OrderRepository(db)
 

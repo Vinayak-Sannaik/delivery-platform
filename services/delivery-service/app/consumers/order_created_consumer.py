@@ -12,6 +12,9 @@ from app.services.delivery_service import DeliveryService
 from app.repositories.outbox_repository import OutboxRepository
 from app.services.outbox_service import OutboxService
 
+from app.repositories.delivery_partner_repository import DeliveryPartnerRepository
+from app.services.assignment_service import AssignmentService
+
 import logging
 
 logger = logging.getLogger(__name__)
@@ -66,9 +69,20 @@ class OrderCreatedConsumer:
                         outbox_repository=outbox_repository,
                     )
 
-                    service = DeliveryService(
-                        delivery_repository=DeliveryRepository(db),
+                    delivery_repository = DeliveryRepository(db)
+
+                    delivery_partner_repository = DeliveryPartnerRepository(db)
+
+                    assignment_service = AssignmentService(
+                        delivery_repository=delivery_repository,
+                        delivery_partner_repository=delivery_partner_repository,
                         outbox_service=outbox_service,
+                    )
+
+                    service = DeliveryService(
+                        delivery_repository=delivery_repository,
+                        outbox_service=outbox_service,
+                        assignment_service=assignment_service,
                     )
 
                     await service.create_from_order(event)
@@ -77,6 +91,8 @@ class OrderCreatedConsumer:
                         "Delivery created for order: %s",
                         event.order_id,
                     )
+                    print( "Delivery created for order: %s",
+                        event.order_id)
 
                     await db.commit()
 

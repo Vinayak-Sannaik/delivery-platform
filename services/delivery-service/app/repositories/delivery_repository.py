@@ -13,10 +13,10 @@ class DeliveryRepository:
     async def create(
         self,
         delivery: Delivery,
-    ) -> Delivery:
+    ):
         self.db.add(delivery)
         await self.db.flush()
-        await self.db.refresh(delivery)
+
         return delivery
 
     async def get_by_order_id(
@@ -36,8 +36,6 @@ class DeliveryRepository:
         delivery: Delivery,
     ) -> Delivery:
         await self.db.flush()
-        await self.db.refresh(delivery)
-
         return delivery
     
     async def get_by_partner_id(

@@ -3,9 +3,14 @@ from app.models.delivery_status import DeliveryStatus
 from app.repositories.delivery_repository import DeliveryRepository
 from app.schemas.order_created_event import OrderCreatedEvent
 from app.services.outbox_service import OutboxService
+from app.services.assignment_service import AssignmentService
 
 from app.schemas.auth import CurrentUser
 from app.models.user import RoleEnum
+
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 VALID_TRANSITIONS = {
@@ -28,14 +33,20 @@ class DeliveryService:
         self,
         delivery_repository: DeliveryRepository,
         outbox_service: OutboxService,
+        assignment_service: AssignmentService
     ):
         self.delivery_repository = delivery_repository
         self.outbox_service = outbox_service
+        self.assignment_service = assignment_service
 
     async def create_from_order(
         self,
         event: OrderCreatedEvent,
     ) -> Delivery:
+        
+        logger.info("Creating delivery for order %s", event.order_id)
+        print("Creating delivery for order %s", event.order_id)
+        
         existing = await self.delivery_repository.get_by_order_id(
             event.order_id,
         )
@@ -50,7 +61,17 @@ class DeliveryService:
             status=DeliveryStatus.PENDING,
         )
 
-        return await self.delivery_repository.create(delivery)
+        # return await self.delivery_repository.create(delivery)
+        # await self.assignment_service.assign_delivery(
+        #     delivery
+        # )
+        
+        await self.delivery_repository.create(delivery)
+
+        await self.assignment_service.assign_delivery(delivery)
+
+        return delivery
+    
     
     async def get_by_order_id(
         self,
