@@ -10,6 +10,9 @@ from app.routers.orders import router as order_router
 from app.workers.outbox_worker import OutboxWorker
 
 
+from app.consumers.delivery_event_consumer import DeliveryEventConsumer
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     catalog_client = CatalogHttpClient()
@@ -22,6 +25,12 @@ async def lifespan(app: FastAPI):
         session_factory=AsyncSessionLocal,
         kafka_producer=kafka_producer,
     )
+    
+    delivery_consumer = DeliveryEventConsumer()
+    
+    delivery_consumer_task = asyncio.create_task(
+        delivery_consumer.start()
+    )
 
     worker_task = asyncio.create_task(outbox_worker.start())
 
@@ -29,9 +38,11 @@ async def lifespan(app: FastAPI):
         yield
     finally:
         worker_task.cancel()
+        delivery_consumer_task.cancel()
 
         try:
             await worker_task
+            await delivery_consumer_task
         except asyncio.CancelledError:
             pass
 

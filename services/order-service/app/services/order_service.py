@@ -18,6 +18,8 @@ from app.models.status_enum import OrderStatus
 from app.repositories.idempotency_repository import IdempotencyRepository
 from app.services.outbox_service import OutboxService
 
+from app.models.status_enum import OrderStatus
+
 class OrderService:
     def __init__(
         self,
@@ -339,5 +341,49 @@ class OrderService:
         order = await self.order_repository.get_by_id(
             order.id
         )
+
+        return order
+    
+    
+    async def handle_delivery_event(
+        self,
+        event: dict,
+    ):
+        event_type = event.get("event_type")
+
+        payload = event.get("payload", {})
+
+        order_id = payload.get("order_id")
+
+        if not order_id:
+            raise ValueError(
+                "order_id missing in delivery event"
+            )
+
+        order = await self.order_repository.get_by_id(
+            order_id
+        )
+
+        if not order:
+            raise ValueError(
+                "Order not found"
+            )
+
+        if event_type == "DeliveryAssigned":
+
+            order.status = OrderStatus.ASSIGNED
+
+        elif event_type == "DeliveryCancelled":
+
+            order.status = OrderStatus.CANCELLED
+
+        elif event_type == "DeliveryStatusChanged":
+
+            delivery_status = payload.get("status")
+
+            if delivery_status == "DELIVERED":
+                order.status = OrderStatus.DELIVERED
+
+        await self.order_repository.update(order)
 
         return order
