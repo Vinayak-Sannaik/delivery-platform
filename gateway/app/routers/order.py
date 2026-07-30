@@ -5,7 +5,7 @@ from app.services.proxy_service import forward_request
 
 
 router = APIRouter(
-    prefix="/orders",
+    prefix="/api/orders",
     tags=["Order Service"],
 )
 
