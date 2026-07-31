@@ -81,16 +81,29 @@ async def forward_request(
 
                 # Success or client error -> don't retry
                 if response.status_code not in (502, 503, 504):
+                    
+                    headers = {
+                        k: v
+                        for k, v in response.headers.items()
+                        if k.lower() not in (
+                            "content-length",
+                            "transfer-encoding",
+                            "content-encoding",
+                            "connection",
+                            "keep-alive",
+                        )
+                    }
+                    
+                    logger.info(
+                        "Downstream headers: %s",
+                        dict(response.headers),
+                    )
+                    
                     return Response(
                         content=response.content,
                         status_code=response.status_code,
                         media_type=response.headers.get("content-type"),
-                        headers={
-                            k: v
-                            for k, v in response.headers.items()
-                            if k.lower()
-                            not in ("content-length", "transfer-encoding")
-                        },
+                        headers=headers,
                     )
 
                 logger.warning(
