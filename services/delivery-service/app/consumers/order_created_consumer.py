@@ -16,6 +16,8 @@ from app.services.outbox_service import OutboxService
 from app.repositories.delivery_partner_repository import DeliveryPartnerRepository
 from app.services.assignment_service import AssignmentService
 
+from app.kafka.dlq_producer import DLQProducer
+
 import logging
 
 logger = logging.getLogger(__name__)
@@ -47,6 +49,8 @@ class OrderCreatedConsumer:
             "orders",
             **kwargs,
         )
+        
+        self.dlq_producer = DLQProducer()
 
     async def start(self):
         await self.consumer.start()
