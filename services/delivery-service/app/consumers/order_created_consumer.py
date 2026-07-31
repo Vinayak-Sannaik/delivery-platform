@@ -98,6 +98,7 @@ class OrderCreatedConsumer:
                                 delivery_repository=delivery_repository,
                                 outbox_service=outbox_service,
                                 assignment_service=assignment_service,
+                                delivery_partner_repository=delivery_partner_repository,
                             )
 
                             await service.create_from_order(event)
