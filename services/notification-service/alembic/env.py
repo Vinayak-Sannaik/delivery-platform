@@ -1,5 +1,6 @@
 from app.models.notification import Notification
 from app.models.outbox_event import OutboxEvent
+from app.models.processed_event import ProcessedEvent
 from logging.config import fileConfig
 
 from sqlalchemy import engine_from_config

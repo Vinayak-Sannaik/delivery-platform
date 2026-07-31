@@ -2,6 +2,7 @@ import json
 import logging
 import ssl
 
+from uuid import UUID
 from aiokafka import AIOKafkaConsumer
 
 from app.core.config import settings
@@ -9,6 +10,8 @@ from app.core.database import AsyncSessionLocal
 from app.repositories.notification_repository import (
     NotificationRepository,
 )
+
+from app.repositories.processed_event_repository import ProcessedEventRepository
 from app.schemas.delivery_assigned_event import (
     DeliveryAssignedEvent,
 )
@@ -72,6 +75,20 @@ class DeliveryAssignedConsumer:
                 async with AsyncSessionLocal() as db:
 
                     repository = NotificationRepository(db)
+                    processed_event_repository = ProcessedEventRepository(db)
+                    
+                    event_id = UUID(message.value["event_id"])
+
+                    processed = await processed_event_repository.exists(
+                        event_id
+                    )
+
+                    if processed:
+                        logger.info(
+                            "Skipping duplicate event %s",
+                            event_id,
+                        )
+                        continue
 
                     service = NotificationService(
                         notification_repository=repository,
@@ -83,6 +100,11 @@ class DeliveryAssignedConsumer:
                         message="A delivery partner has been assigned to your order.",
                         type="DELIVERY_ASSIGNED",
                     )
+                    
+                    await processed_event_repository.create(
+                        event_id=event_id,
+                        event_type=message.value["event_type"],
+                    )
 
                     await db.commit()
 
@@ -93,3 +115,7 @@ class DeliveryAssignedConsumer:
 
         finally:
             await self.consumer.stop()
+            
+    
+    async def stop(self):
+        await self.consumer.stop()

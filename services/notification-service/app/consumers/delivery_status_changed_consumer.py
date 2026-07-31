@@ -7,15 +7,19 @@ from aiokafka import AIOKafkaConsumer
 
 from app.core.config import settings
 from app.core.database import AsyncSessionLocal
-from app.repositories.notification_repository import NotificationRepository
+from app.repositories.notification_repository import (
+    NotificationRepository,
+)
 from app.repositories.processed_event_repository import ProcessedEventRepository
-from app.schemas.order_created_event import OrderCreatedEvent
-from app.services.notification_service import NotificationService
+from app.schemas.delivery_status_changed_event import DeliveryStatusChangedEvent
+from app.services.notification_service import (
+    NotificationService,
+)
 
 logger = logging.getLogger(__name__)
 
 
-class OrderCreatedConsumer:
+class DeliveryStatusChangedConsumer:
     def __init__(self):
         kwargs = {
             "bootstrap_servers": settings.KAFKA_BOOTSTRAP_SERVERS,
@@ -41,7 +45,7 @@ class OrderCreatedConsumer:
             )
 
         self.consumer = AIOKafkaConsumer(
-            "orders",
+            "delivery-events",
             **kwargs,
         )
 
@@ -50,13 +54,16 @@ class OrderCreatedConsumer:
 
         try:
             async for message in self.consumer:
-                
-                print(
-                        "Notification created for order"
-                    )
 
-                event = OrderCreatedEvent.model_validate(
-                    message.value["data"]
+                print(
+                    "Delivery status changed event received from Kafka topic delivery-events"
+                )
+
+                if message.value["event_type"] != "DeliveryStatusChanged":
+                    continue
+
+                event = DeliveryStatusChangedEvent.model_validate(
+                    message.value["payload"]
                 )
 
                 async with AsyncSessionLocal() as db:
@@ -81,11 +88,31 @@ class OrderCreatedConsumer:
                         notification_repository=repository,
                     )
 
+                    status_messages = {
+                        "PICKED_UP": (
+                            "Order Picked Up",
+                            "Your order has been picked up.",
+                        ),
+                        "DELIVERED": (
+                            "Order Delivered",
+                            "Your order has been delivered.",
+                        ),
+                        "CANCELLED": (
+                            "Order Cancelled",
+                            "Your order has been cancelled.",
+                        ),
+                    }
+
+                    if event.status not in status_messages:
+                        continue
+
+                    title, message = status_messages[event.status]
+
                     await service.create_notification(
                         user_id=event.customer_id,
-                        title="Order Placed",
-                        message="Your order has been placed successfully.",
-                        type="ORDER_CREATED",
+                        title=title,
+                        message=message,
+                        type="DELIVERY_STATUS",
                     )
                     
                     await processed_event_repository.create(
@@ -96,7 +123,7 @@ class OrderCreatedConsumer:
                     await db.commit()
 
                     logger.info(
-                        "Notification created for order %s",
+                        "Delivery status changed notification created for order %s",
                         event.order_id,
                     )
 
