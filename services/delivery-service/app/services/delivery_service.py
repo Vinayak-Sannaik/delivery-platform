@@ -174,6 +174,7 @@ class DeliveryService:
                 "delivery_id": str(delivery.id),
                 "order_id": str(delivery.order_id),
                 "status": status.value,
+                "customer_id": str(delivery.customer_id),
             },
         )
 
@@ -226,6 +227,7 @@ class DeliveryService:
                 "delivery_partner_id": str(
                     delivery_partner_id
                 ),
+                "customer_id": str(delivery.customer_id),
                 "status": delivery.status.value,
             },
         )

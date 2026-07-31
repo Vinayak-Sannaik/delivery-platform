@@ -56,6 +56,7 @@ class AssignmentService:
                 "delivery_id": str(delivery.id),
                 "order_id": str(delivery.order_id),
                 "delivery_partner_id": str(partner.user_id),
+                "customer_id": str(delivery.customer_id),
                 "status": delivery.status.value,
             },
         )

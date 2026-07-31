@@ -4,25 +4,37 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
 from app.consumers.order_created_consumer import OrderCreatedConsumer
+from app.consumers.delivery_assigned_consumer import DeliveryAssignedConsumer
 from app.routers.notifications import router as notification_router
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     order_created_consumer = OrderCreatedConsumer()
+    delivery_assigned_consumer = DeliveryAssignedConsumer()
 
-    consumer_task = asyncio.create_task(
+    order_created_task = asyncio.create_task(
         order_created_consumer.start()
+    )
+
+    delivery_assigned_task = asyncio.create_task(
+        delivery_assigned_consumer.start()
     )
 
     try:
         yield
 
     finally:
-        consumer_task.cancel()
+        order_created_task.cancel()
+        delivery_assigned_task.cancel()
 
         try:
-            await consumer_task
+            await order_created_task
+        except asyncio.CancelledError:
+            pass
+
+        try:
+            await delivery_assigned_task
         except asyncio.CancelledError:
             pass
 

@@ -71,6 +71,8 @@ class OrderCreatedConsumer:
                             "Kafka message received: %s",
                             message.value,
                         )
+                        
+                        print("Kafka message received at delivery-service")
 
                         async with AsyncSessionLocal() as db:
 
