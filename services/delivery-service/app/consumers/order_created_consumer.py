@@ -32,7 +32,7 @@ class OrderCreatedConsumer:
         }
         if settings.KAFKA_SECURITY_PROTOCOL == "SASL_SSL":
             ssl_context = ssl.create_default_context(
-                cafile="certs/aiven-ca.pem",
+                cafile=settings.KAFKA_SSL_CA_LOCATION
             )
 
             kwargs.update(
