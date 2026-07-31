@@ -133,12 +133,12 @@ class DeliveryService:
                 "Only delivery partners or admins can update delivery status"
             )
 
-        if delivery.delivery_partner_id != current_user.user_id:
-            raise PermissionError(
-                "You are not assigned to this delivery"
-            )
-            
-            
+        if current_user.role == RoleEnum.DELIVERY_PARTNER:
+            if delivery.delivery_partner_id != current_user.user_id:
+                raise PermissionError(
+                    "You are not assigned to this delivery"
+                )
+
         if delivery.status == DeliveryStatus.DELIVERED:
             raise ValueError(
                 "Delivered delivery cannot be updated"
