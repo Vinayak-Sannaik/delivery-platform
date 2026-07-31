@@ -125,9 +125,12 @@ class DeliveryService:
         if not delivery:
             raise ValueError("Delivery not found")
 
-        if current_user.role != RoleEnum.DELIVERY_PARTNER:
+        if current_user.role not in (
+            RoleEnum.DELIVERY_PARTNER,
+            RoleEnum.ADMIN,
+        ):
             raise PermissionError(
-                "Only delivery partners can update delivery status"
+                "Only delivery partners or admins can update delivery status"
             )
 
         if delivery.delivery_partner_id != current_user.user_id:
