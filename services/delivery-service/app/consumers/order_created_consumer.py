@@ -2,6 +2,7 @@ import json
 import ssl
 
 from aiokafka import AIOKafkaConsumer
+import asyncio
 
 from app.core.config import settings
 from app.core.database import AsyncSessionLocal
@@ -49,52 +50,84 @@ class OrderCreatedConsumer:
 
     async def start(self):
         await self.consumer.start()
+        await self.dlq_producer.start()
 
         try:
             async for message in self.consumer:
-                logger.info(
-                    "Kafka message received: %s",
-                    message.value,
-                )
-                print( "Kafka message received: %s",
-                    message.value,)
+
                 event = OrderCreatedEvent.model_validate(
                     message.value["data"]
                 )
 
-                async with AsyncSessionLocal() as db:
-                    outbox_repository = OutboxRepository(db)
+                max_retries = 3
 
-                    outbox_service = OutboxService(
-                        outbox_repository=outbox_repository,
-                    )
+                for attempt in range(1, max_retries + 1):
+                    try:
+                        logger.info(
+                            "Kafka message received: %s",
+                            message.value,
+                        )
 
-                    delivery_repository = DeliveryRepository(db)
+                        async with AsyncSessionLocal() as db:
 
-                    delivery_partner_repository = DeliveryPartnerRepository(db)
+                            outbox_repository = OutboxRepository(db)
 
-                    assignment_service = AssignmentService(
-                        delivery_repository=delivery_repository,
-                        delivery_partner_repository=delivery_partner_repository,
-                        outbox_service=outbox_service,
-                    )
+                            outbox_service = OutboxService(
+                                outbox_repository=outbox_repository,
+                            )
 
-                    service = DeliveryService(
-                        delivery_repository=delivery_repository,
-                        outbox_service=outbox_service,
-                        assignment_service=assignment_service,
-                    )
+                            delivery_repository = DeliveryRepository(db)
 
-                    await service.create_from_order(event)
-                    
-                    logger.info(
-                        "Delivery created for order: %s",
-                        event.order_id,
-                    )
-                    print( "Delivery created for order: %s",
-                        event.order_id)
+                            delivery_partner_repository = (
+                                DeliveryPartnerRepository(db)
+                            )
 
-                    await db.commit()
+                            assignment_service = AssignmentService(
+                                delivery_repository=delivery_repository,
+                                delivery_partner_repository=delivery_partner_repository,
+                                outbox_service=outbox_service,
+                            )
+
+                            service = DeliveryService(
+                                delivery_repository=delivery_repository,
+                                outbox_service=outbox_service,
+                                assignment_service=assignment_service,
+                            )
+
+                            await service.create_from_order(event)
+
+                            await db.commit()
+
+                        logger.info(
+                            "Delivery created for order: %s",
+                            event.order_id,
+                        )
+
+                        # Success
+                        break
+
+                    except Exception as e:
+                        logger.exception(
+                            "Attempt %s/%s failed",
+                            attempt,
+                            max_retries,
+                        )
+
+                        if attempt == max_retries:
+
+                            await self.dlq_producer.publish(
+                                "orders-dlq",
+                                {
+                                    "original_topic": "orders",
+                                    "retry_count": attempt,
+                                    "error": str(e),
+                                    "event": message.value,
+                                },
+                            )
+
+                        else:
+                            await asyncio.sleep(2 ** attempt)
 
         finally:
             await self.consumer.stop()
+            await self.dlq_producer.stop()
