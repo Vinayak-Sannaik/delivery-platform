@@ -17,6 +17,4 @@ async def start_grpc_server():
 
     await server.start()
 
-    print("gRPC server listening on :50051")
-
     return server

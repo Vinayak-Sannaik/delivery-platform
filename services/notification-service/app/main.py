@@ -2,12 +2,15 @@ import asyncio
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
+from app.core.logging import setup_logging
 
 from app.consumers.order_created_consumer import OrderCreatedConsumer
 from app.consumers.delivery_assigned_consumer import DeliveryAssignedConsumer
 from app.consumers.delivery_status_changed_consumer import DeliveryStatusChangedConsumer
 from app.routers.notifications import router as notification_router
+from app.middleware.request_id import RequestIdMiddleware
 
+setup_logging()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -63,6 +66,8 @@ app = FastAPI(
     version="1.0.0",
     lifespan=lifespan,
 )
+
+app.add_middleware(RequestIdMiddleware)
 
 app.include_router(notification_router)
 

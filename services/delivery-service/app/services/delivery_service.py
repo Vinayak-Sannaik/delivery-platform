@@ -50,7 +50,7 @@ class DeliveryService:
     ) -> Delivery:
         
         logger.info("Creating delivery for order %s", event.order_id)
-        print("Creating delivery for order %s", event.order_id)
+        # print("Creating delivery for order %s", event.order_id)
         
         existing = await self.delivery_repository.get_by_order_id(
             event.order_id,

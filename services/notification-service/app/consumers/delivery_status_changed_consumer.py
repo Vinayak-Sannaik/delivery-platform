@@ -55,10 +55,6 @@ class DeliveryStatusChangedConsumer:
         try:
             async for message in self.consumer:
 
-                print(
-                    "Delivery status changed event received from Kafka topic delivery-events"
-                )
-
                 if message.value["event_type"] != "DeliveryStatusChanged":
                     continue
 

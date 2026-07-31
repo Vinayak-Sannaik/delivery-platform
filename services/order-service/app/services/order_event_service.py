@@ -20,10 +20,6 @@ class OrderEventService:
         logger.info(
             "handle_delivery_event:-",
         )
-
-        print(
-            "handle_delivery_event:",
-        )
         
         event_type = event.get("event_type")
 
@@ -50,10 +46,6 @@ class OrderEventService:
         
         logger.info(
             "handle_delivery_event end:-",
-        )
-
-        print(
-            "handle_delivery_event end:",
         )
 
         return order

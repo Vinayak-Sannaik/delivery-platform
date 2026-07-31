@@ -2,6 +2,7 @@ import asyncio
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
+from app.core.logging import setup_logging
 
 from app.consumers.order_created_consumer import OrderCreatedConsumer
 from app.kafka.producer import KafkaProducer
@@ -9,7 +10,9 @@ from app.workers.outbox_worker import OutboxWorker
 from app.core.database import AsyncSessionLocal
 from app.routers.deliveries import router as delivery_router
 from app.routers.delivery_partners import router as delivery_partner_router
+from app.middleware.request_id import RequestIdMiddleware
 
+setup_logging()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -72,6 +75,7 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+app.add_middleware(RequestIdMiddleware)
 
 app.include_router(delivery_router)
 app.include_router(delivery_partner_router)

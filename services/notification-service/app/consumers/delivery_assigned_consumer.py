@@ -58,10 +58,6 @@ class DeliveryAssignedConsumer:
         try:
             async for message in self.consumer:
 
-                print(
-                        "Delivery assigned event received from Kafka topic delivery-events"
-                    )
-                
                 if (
                     message.value["event_type"]
                     != "DeliveryAssigned"

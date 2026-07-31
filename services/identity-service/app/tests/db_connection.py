@@ -4,6 +4,6 @@ from app.db.session import engine
 
 with engine.connect() as conn:
     result = conn.execute(text("SELECT 1"))
-    print(result.scalar())
+    # print(result.scalar())
 
 # python -m app.tests.db

@@ -1,13 +1,16 @@
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
+from app.core.logging import setup_logging
 
 from app.grpc.server import start_grpc_server
 from app.routers.category import router as category_router
 from app.routers.menu_item import router as menu_item_router
 from app.routers.restaurant import router as restaurant_router
 from app.routers.internal import router as internal_router
+from app.middleware.request_id import RequestIdMiddleware
 
+setup_logging()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -24,6 +27,8 @@ app = FastAPI(
     version="1.0.0",
     lifespan=lifespan,
 )
+
+app.middleware(RequestIdMiddleware)
 
 app.include_router(restaurant_router)
 app.include_router(category_router)

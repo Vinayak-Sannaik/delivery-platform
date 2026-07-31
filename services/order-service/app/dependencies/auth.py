@@ -11,8 +11,6 @@ security = HTTPBearer()
 def get_current_user(
     credentials: HTTPAuthorizationCredentials = Depends(security),
 ) -> CurrentUser:
-    
-    print("Order Service: Validating JWT")
 
     try:
         payload = verify_access_token(credentials.credentials)

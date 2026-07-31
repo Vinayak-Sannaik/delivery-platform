@@ -72,8 +72,6 @@ class OrderCreatedConsumer:
                             message.value,
                         )
                         
-                        print("Kafka message received at delivery-service")
-
                         async with AsyncSessionLocal() as db:
 
                             outbox_repository = OutboxRepository(db)

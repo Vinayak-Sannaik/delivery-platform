@@ -1,4 +1,5 @@
 import asyncio
+import logging
 
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
@@ -6,6 +7,7 @@ from app.kafka.producer import KafkaProducer
 from app.repositories.outbox_repository import OutboxRepository
 from app.services.outbox_publisher import OutboxPublisher
 
+logger = logging.getLogger(__name__)
 
 class OutboxWorker:
     def __init__(
@@ -35,7 +37,7 @@ class OutboxWorker:
                     await publisher.publish_pending_events()
 
             except Exception as e:
-                print(
+                logger.error(
                     "Outbox worker error:",
                     e,
                 )

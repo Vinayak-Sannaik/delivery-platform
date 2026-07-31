@@ -50,10 +50,6 @@ class OrderCreatedConsumer:
 
         try:
             async for message in self.consumer:
-                
-                print(
-                        "Notification created for order"
-                    )
 
                 event = OrderCreatedEvent.model_validate(
                     message.value["data"]

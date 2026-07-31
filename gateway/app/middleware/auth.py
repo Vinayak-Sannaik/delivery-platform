@@ -72,7 +72,5 @@ class AuthenticationMiddleware(BaseHTTPMiddleware):
                 status_code=401,
                 content={"detail": "Gateway received an invalid or expired token."},
             )
-            
-        print("Gateway: JWT validated")
 
         return await call_next(request)

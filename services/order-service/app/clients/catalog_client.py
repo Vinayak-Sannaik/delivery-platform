@@ -11,7 +11,7 @@ class CatalogClient:
     def __init__(
         self,
     ):
-        print("CATALOG GRPC ADDRESS:", settings.CATALOG_GRPC_ADDRESS)
+        # print("CATALOG GRPC ADDRESS:", settings.CATALOG_GRPC_ADDRESS)
 
         self.channel = grpc.aio.insecure_channel(settings.CATALOG_GRPC_ADDRESS)
 
