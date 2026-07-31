@@ -11,9 +11,10 @@ class DeliveryPartnerRepository:
         self.db = db
 
     async def get_first_available(self) -> DeliveryPartner | None:
-        result = await self.db.execute(
+        result = await self.db.execute(            
             select(DeliveryPartner)
             .where(DeliveryPartner.is_available.is_(True))
+            .order_by(DeliveryPartner.updated_at)
             .limit(1)
         )
 

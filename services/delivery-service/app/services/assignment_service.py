@@ -21,32 +21,32 @@ class AssignmentService:
         self,
         delivery,
     ):
-        print("1. Looking for available partner")
+        # print("1. Looking for available partner")
 
         partner = await self.delivery_partner_repository.get_first_available()
 
-        print("2. Partner:", partner)
+        # print("2. Partner:", partner)
 
         if not partner:
             print("3. No partner found")
             return False
 
-        print("4. Updating delivery")
+        # print("4. Updating delivery")
 
         delivery.delivery_partner_id = partner.user_id
         delivery.status = DeliveryStatus.ASSIGNED
 
-        print("5. Updating partner")
+        # print("5. Updating partner")
 
         partner.is_available = False
 
         await self.delivery_repository.update(delivery)
 
-        print("6. Delivery updated")
+        # print("6. Delivery updated")
 
         await self.delivery_partner_repository.update(partner)
 
-        print("7. Partner updated")
+        # print("7. Partner updated")
 
         await self.outbox_service.create_event(
             aggregate_type="Delivery",
@@ -60,6 +60,6 @@ class AssignmentService:
             },
         )
 
-        print("8. Outbox event created")
+        # print("8. Outbox event created")
 
         return True

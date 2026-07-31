@@ -8,6 +8,7 @@ from app.kafka.producer import KafkaProducer
 from app.workers.outbox_worker import OutboxWorker
 from app.core.database import AsyncSessionLocal
 from app.routers.deliveries import router as delivery_router
+from app.routers.delivery_partners import router as delivery_partner_router
 
 
 @asynccontextmanager
@@ -73,6 +74,7 @@ app = FastAPI(
 
 
 app.include_router(delivery_router)
+app.include_router(delivery_partner_router)
 
 
 @app.get("/health")

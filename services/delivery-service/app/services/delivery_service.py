@@ -4,6 +4,8 @@ from app.repositories.delivery_repository import DeliveryRepository
 from app.schemas.order_created_event import OrderCreatedEvent
 from app.services.outbox_service import OutboxService
 from app.services.assignment_service import AssignmentService
+from app.repositories.delivery_partner_repository import DeliveryPartnerRepository
+from datetime import datetime, timezone
 
 from app.schemas.auth import CurrentUser
 from app.models.user import RoleEnum
@@ -33,11 +35,14 @@ class DeliveryService:
         self,
         delivery_repository: DeliveryRepository,
         outbox_service: OutboxService,
-        assignment_service: AssignmentService
+        assignment_service: AssignmentService,
+        delivery_partner_repository: DeliveryPartnerRepository
+        
     ):
         self.delivery_repository = delivery_repository
         self.outbox_service = outbox_service
         self.assignment_service = assignment_service
+        self.delivery_partner_repository = delivery_partner_repository
 
     async def create_from_order(
         self,
@@ -130,6 +135,7 @@ class DeliveryService:
                 "You are not assigned to this delivery"
             )
             
+            
         if delivery.status == DeliveryStatus.DELIVERED:
             raise ValueError(
                 "Delivered delivery cannot be updated"
@@ -139,6 +145,7 @@ class DeliveryService:
             raise ValueError(
                 "Cancelled delivery cannot be updated"
             )
+        
             
         allowed_statuses = VALID_TRANSITIONS.get(
             delivery.status,
@@ -151,6 +158,14 @@ class DeliveryService:
             )
 
         delivery.status = status
+        
+        if status in (
+            DeliveryStatus.DELIVERED,
+            DeliveryStatus.CANCELLED,
+        ):
+            await self.release_delivery_partner(delivery)
+        
+        
         await self.outbox_service.create_event(
             aggregate_type="Delivery",
             aggregate_id=delivery.id,
@@ -292,3 +307,20 @@ class DeliveryService:
         await self.delivery_repository.db.commit()
 
         return updated_delivery
+    
+    
+    async def release_delivery_partner(
+        self,
+        delivery: Delivery,
+    ):
+        if delivery.delivery_partner_id is None:
+            return
+
+        partner = await self.delivery_partner_repository.get_by_user_id(
+            delivery.delivery_partner_id
+        )
+
+        if partner:
+            partner.is_available = True
+            partner.updated_at = datetime.now(timezone.utc)
+            await self.delivery_partner_repository.update(partner)
