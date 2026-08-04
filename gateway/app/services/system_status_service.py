@@ -21,13 +21,11 @@ class SystemStatusService:
     ):
         start = time.perf_counter()
 
-        response = None
-
-        for _ in range(5):
+        for attempt in range(6):
             try:
                 response = await client.get(
                     url,
-                    timeout=5,
+                    timeout=30,
                 )
 
                 if response.status_code == 200:
@@ -41,12 +39,16 @@ class SystemStatusService:
                         "latency_ms": round(latency, 2),
                     }
 
-            except Exception as e:
                 print(
-                    f"{name} failed: {str(e)}"
+                    f"{name} returned {response.status_code}, retrying..."
                 )
 
-                await asyncio.sleep(5)
+            except Exception as e:
+                print(
+                    f"{name} error: {str(e)}"
+                )
+
+            await asyncio.sleep(5)
 
         return {
             "name": name,
