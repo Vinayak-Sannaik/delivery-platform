@@ -9,7 +9,6 @@ router = APIRouter(
     tags=["Order Service"],
 )
 
-
 @router.api_route(
     "/{path:path}",
     methods=["GET", "POST", "PUT", "PATCH", "DELETE"]

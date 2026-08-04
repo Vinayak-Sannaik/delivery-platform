@@ -83,4 +83,4 @@ app.include_router(delivery_partner_router)
 
 @app.get("/health")
 async def health():
-    return {"status": "ok"}
+    return {"status": "healthy"}
