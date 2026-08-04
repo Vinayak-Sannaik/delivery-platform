@@ -41,7 +41,11 @@ class SystemStatusService:
                         "latency_ms": round(latency, 2),
                     }
 
-            except Exception:
+            except Exception as e:
+                print(
+                    f"{name} failed: {str(e)}"
+                )
+
                 await asyncio.sleep(2)
 
         return {
