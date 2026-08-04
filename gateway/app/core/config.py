@@ -7,6 +7,7 @@ class Settings(BaseSettings):
     CATALOG_SERVICE_URL: str
     ORDER_SERVICE_URL: str
     DELIVERY_SERVICE_URL: str
+    NOTIFICATION_SERVICE_URL: str
     
     
     JWT_SECRET_KEY: str
