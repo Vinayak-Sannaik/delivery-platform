@@ -9,6 +9,7 @@ from app.routers.health  import router as health_router
 
 from app.middleware.auth import AuthenticationMiddleware
 from app.middleware.request_id import RequestIdMiddleware
+from fastapi.middleware.cors import CORSMiddleware
 
 
 setup_logging()
@@ -16,6 +17,16 @@ setup_logging()
 app = FastAPI(
     title="Food Delivery API Gateway",
     version="1.0.0",
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:5173",
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 app.add_middleware(RequestIdMiddleware)
