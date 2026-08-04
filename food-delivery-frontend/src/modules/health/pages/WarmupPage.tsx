@@ -8,7 +8,7 @@ import {
 
 import { useNavigate } from "react-router-dom";
 
-import { useSystemStatus } from "../hooks/useSystemStatus";
+import { useWarmup } from "../hooks/useWarmup";
 import ServiceStatusCard from "../components/ServiceStatusCard";
 
 
@@ -16,10 +16,10 @@ export default function WarmupPage() {
   const navigate = useNavigate();
 
   const {
+    mutate,
     data,
     isPending,
-    refetch,
-  } = useSystemStatus();
+  } = useWarmup();
 
 
   const ready = data?.ready ?? false;
@@ -36,15 +36,13 @@ export default function WarmupPage() {
             size="xl"
             fw={700}
           >
-            System Status
+            Food Delivery Platform
           </Text>
 
 
-          {isPending && (
-            <Text>
-              Checking services...
-            </Text>
-          )}
+          <Text>
+            Start backend services before continuing
+          </Text>
 
 
           {data?.services.map((service) => (
@@ -56,9 +54,10 @@ export default function WarmupPage() {
 
 
           <Button
-            onClick={() => refetch()}
+            loading={isPending}
+            onClick={() => mutate()}
           >
-            Check Again
+            Start Application
           </Button>
 
 
@@ -66,7 +65,7 @@ export default function WarmupPage() {
             disabled={!ready}
             onClick={() => navigate("/login")}
           >
-            Continue
+            Continue to Login
           </Button>
 
 

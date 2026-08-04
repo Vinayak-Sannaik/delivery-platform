@@ -20,9 +20,9 @@ class SystemStatusService:
         url: str,
         retries=1,
     ):
-        start = time.perf_counter(retries)
+        start = time.perf_counter()
 
-        for attempt in range():
+        for attempt in range(retries):
             try:
                 response = await client.get(
                     url,
