@@ -23,7 +23,7 @@ class SystemStatusService:
 
         response = None
 
-        for _ in range(3):
+        for _ in range(5):
             try:
                 response = await client.get(
                     url,
@@ -46,7 +46,7 @@ class SystemStatusService:
                     f"{name} failed: {str(e)}"
                 )
 
-                await asyncio.sleep(2)
+                await asyncio.sleep(5)
 
         return {
             "name": name,
