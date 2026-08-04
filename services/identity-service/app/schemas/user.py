@@ -1,5 +1,6 @@
 from pydantic import BaseModel, EmailStr, Field
-
+from uuid import UUID
+from app.models.user import RoleEnum
 
 class SignupRequest(BaseModel):
     email: EmailStr
@@ -24,3 +25,12 @@ class LoginResponse(BaseModel):
     access_token: str
     refresh_token: str
     token_type: str = "Bearer"
+    
+class CurrentUserResponse(BaseModel):
+    id: UUID
+    email: str
+    role: RoleEnum
+
+    model_config = {
+        "from_attributes": True,
+    }

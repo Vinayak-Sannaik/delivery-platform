@@ -42,3 +42,19 @@ def create_refresh_token(user_id: str) -> tuple[str, str]:
     )
 
     return token, jti
+
+def decode_access_token(token: str) -> dict:
+    try:
+        payload = jwt.decode(
+            token,
+            settings.JWT_SECRET_KEY,
+            algorithms=[settings.JWT_ALGORITHM],
+        )
+
+        if payload.get("type") != "access":
+            raise ValueError("Invalid token type")
+
+        return payload
+
+    except Exception:
+        raise ValueError("Invalid access token")
