@@ -45,6 +45,10 @@ PUBLIC_PREFIXES = (
 
 class AuthenticationMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
+        
+        # Allow CORS preflight
+        if request.method == "OPTIONS":
+            return await call_next(request)
 
         if any(request.url.path.startswith(path) for path in PUBLIC_PREFIXES):
             return await call_next(request)
