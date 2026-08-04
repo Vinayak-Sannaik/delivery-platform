@@ -1,50 +1,79 @@
-import { Center, Loader, Stack, Text } from "@mantine/core";
-import { useEffect } from "react";
+import {
+  Button,
+  Center,
+  Container,
+  Stack,
+  Text,
+} from "@mantine/core";
+
 import { useNavigate } from "react-router-dom";
-import { useHealth } from "../hooks/useHealth";
+
+import { useSystemStatus } from "../hooks/useSystemStatus";
+import ServiceStatusCard from "../components/ServiceStatusCard";
+
 
 export default function WarmupPage() {
-  const { data, isPending, isError } = useHealth();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    if (data?.status === "healthy") {
-      const timer = setTimeout(() => {
-        navigate("/login", { replace: true });
-      }, 1500);
+  const {
+    data,
+    isPending,
+    refetch,
+  } = useSystemStatus();
 
-      return () => clearTimeout(timer);
-    }
-  }, [data, navigate]);
 
-  if (isPending) {
-    return (
-      <Center mih="100vh">
-        <Stack align="center">
-          <Loader size="lg" />
-          <Text>Waking up backend services...</Text>
-        </Stack>
-      </Center>
-    );
-  }
+  const ready = data?.ready ?? false;
 
-  if (isError) {
-    return (
-      <Center mih="100vh">
-        <Text c="red">Failed to connect to the backend.</Text>
-      </Center>
-    );
-  }
 
   return (
     <Center mih="100vh">
-      <Stack align="center">
-        <Text fw={700} size="xl">
-          Backend Ready 🚀
-        </Text>
 
-        <Text c="dimmed">Redirecting to login...</Text>
-      </Stack>
+      <Container size="sm" w="100%">
+
+        <Stack>
+
+          <Text
+            size="xl"
+            fw={700}
+          >
+            System Status
+          </Text>
+
+
+          {isPending && (
+            <Text>
+              Checking services...
+            </Text>
+          )}
+
+
+          {data?.services.map((service) => (
+            <ServiceStatusCard
+              key={service.name}
+              service={service}
+            />
+          ))}
+
+
+          <Button
+            onClick={() => refetch()}
+          >
+            Check Again
+          </Button>
+
+
+          <Button
+            disabled={!ready}
+            onClick={() => navigate("/login")}
+          >
+            Continue
+          </Button>
+
+
+        </Stack>
+
+      </Container>
+
     </Center>
   );
 }
