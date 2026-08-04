@@ -18,10 +18,11 @@ class SystemStatusService:
         client: httpx.AsyncClient,
         name: str,
         url: str,
+        retries=1,
     ):
-        start = time.perf_counter()
+        start = time.perf_counter(retries)
 
-        for attempt in range(6):
+        for attempt in range():
             try:
                 response = await client.get(
                     url,
@@ -37,6 +38,7 @@ class SystemStatusService:
                         "name": name,
                         "status": "healthy",
                         "latency_ms": round(latency, 2),
+                         "error": None,
                     }
 
                 print(
@@ -45,7 +47,7 @@ class SystemStatusService:
 
             except Exception as e:
                 print(
-                    f"{name} error: {str(e)}"
+                    f"{name} error: {type(e).__name__}: {repr(e)}"
                 )
 
             await asyncio.sleep(5)
@@ -54,9 +56,10 @@ class SystemStatusService:
             "name": name,
             "status": "starting",
             "latency_ms": None,
+            "error": f"Last response: {response.status_code}",
         }
     
-    async def get_status(self):
+    async def get_status(self, retries: int = 1,):
         async with httpx.AsyncClient() as client:
 
             tasks = [
@@ -64,6 +67,7 @@ class SystemStatusService:
                     client,
                     name,
                     url,
+                    retries,
                 )
                 for name, url in self.SERVICES.items()
             ]
@@ -78,3 +82,32 @@ class SystemStatusService:
                 },
                 *services,
             ]
+            
+    async def warmup(self):
+        max_attempts = 12
+
+        for attempt in range(max_attempts):
+
+            services = await self.get_status()
+
+            non_gateway_services = [
+                service
+                for service in services
+                if service["name"] != "Gateway"
+            ]
+
+            all_ready = all(
+                service["status"] == "healthy"
+                for service in non_gateway_services
+            )
+
+            if all_ready:
+                return services
+
+            print(
+                f"Warmup attempt {attempt + 1}/{max_attempts} failed. Retrying..."
+            )
+
+            await asyncio.sleep(6)
+
+        return services
