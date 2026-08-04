@@ -39,6 +39,7 @@ PUBLIC_PREFIXES = (
     "/redoc",
     "/openapi.json",
     "/auth",
+    "/health"
 )
 
 class AuthenticationMiddleware(BaseHTTPMiddleware):

@@ -5,6 +5,8 @@ from app.core.logging import setup_logging
 from app.routers.auth import router as auth_router
 from app.routers.catalog import router as catalog_router
 from app.routers.order  import router as order_router
+from app.routers.health  import router as health_router
+
 from app.middleware.auth import AuthenticationMiddleware
 from app.middleware.request_id import RequestIdMiddleware
 
@@ -22,3 +24,4 @@ app.add_middleware(AuthenticationMiddleware)
 app.include_router(auth_router)
 app.include_router(catalog_router)
 app.include_router(order_router)
+app.include_router(health_router)
