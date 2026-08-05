@@ -2,6 +2,7 @@ import { Button, Paper, PasswordInput, Stack, TextInput, Title } from "@mantine/
 import { useForm } from "@mantine/form";
 
 import { useLogin } from "../hooks/useLogin";
+import { useNavigate } from "react-router-dom";
 
 export default function LoginPage() {
   const form = useForm({
@@ -12,16 +13,17 @@ export default function LoginPage() {
   });
 
   const loginMutation = useLogin();
+  const navigate = useNavigate();
 
   const handleSubmit = form.onSubmit(async (values) => {
-    try {
-      const response = await loginMutation.mutateAsync(values);
+  try {
+    await loginMutation.mutateAsync(values);
 
-      console.log("Login Success:", response);
-    } catch (error) {
-      console.error("Login Failed:", error);
-    }
-  });
+    navigate("/dashboard");
+  } catch (error) {
+    console.error("Login Failed:", error);
+  }
+});
 
   return (
     <Paper>

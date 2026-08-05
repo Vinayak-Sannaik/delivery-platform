@@ -40,9 +40,11 @@ export default function WarmupPage() {
           </Text>
 
 
-          <Text>
-            Start backend services before continuing
-          </Text>
+          {ready?<Text c="green">
+            All backend services are ready.
+          </Text> : <Text c="dimmed">
+            Wake all backend services before using the application.
+          </Text>}
 
 
           {data?.services.map((service) => (
@@ -52,13 +54,17 @@ export default function WarmupPage() {
             />
           ))}
 
+          
+          
+
 
           <Button
-            loading={isPending}
-            onClick={() => mutate()}
-          >
-            Start Application
-          </Button>
+  loading={isPending}
+  disabled={ready}
+  onClick={() => mutate()}
+>
+  {ready ? "Application Ready" : "Start Application"}
+</Button>
 
 
           <Button

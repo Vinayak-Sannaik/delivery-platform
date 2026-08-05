@@ -69,3 +69,21 @@ src/
 ├── App.tsx
 ├── main.tsx
 └── vite-env.d.ts
+
+
+Frontend
+    │
+    ▼
+POST /auth/login
+    │
+    ▼
+access_token + refresh_token
+    │
+    ▼
+GET /auth/me
+    │
+    ▼
+Zustand Store
+    │
+    ▼
+Dashboard

@@ -12,6 +12,11 @@ import DashboardPage from "../../modules/dashboard/pages/DashboardPage";
 
 import ProtectedRoute from "./ProtectedRoute";
 
+import RestaurantsPage from "../../modules/restaurants/pages/RestaurantsPage";
+import RestaurantDetailsPage from "../../modules/restaurants/pages/RestaurantDetailsPage";
+import CartPage from "../../modules/cart/pages/CartPage";
+import OrdersPage from "../../modules/orders/pages/OrdersPage";
+
 export const router = createBrowserRouter([
   // Warmup
   {
@@ -50,6 +55,36 @@ export const router = createBrowserRouter([
             path: "/dashboard",
             element: <DashboardPage />,
           },
+        ],
+      },
+    ],
+  },
+  {
+    element: <ProtectedRoute />,
+    children: [
+      {
+        element: <AppLayout />,
+        children: [
+          {
+            path: "/dashboard",
+            element: <DashboardPage />,
+          },
+          {
+            path: "/restaurants",
+            element: <RestaurantsPage />,
+          },
+          {
+            path: "/restaurants/:id",
+            element: <RestaurantDetailsPage />,
+          },
+          {
+            path: "/cart",
+            element: <CartPage />,
+          },
+          {
+        path: "/orders",
+        element: <OrdersPage />,
+      }
         ],
       },
     ],
