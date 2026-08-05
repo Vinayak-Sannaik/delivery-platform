@@ -93,7 +93,7 @@ async def cancel_delivery(
     
     
 @router.get(
-    "/deliveries",
+    "",
     response_model=list[DeliveryResponse],
 )
 async def get_all_deliveries(
