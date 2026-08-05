@@ -329,3 +329,20 @@ class DeliveryService:
             partner.is_available = True
             partner.updated_at = datetime.now(timezone.utc)
             await self.delivery_partner_repository.update(partner)
+            
+        
+    async def get_all(
+            self,
+            current_user,
+            skip: int = 0,
+            limit: int = 10,
+        ):
+            if  current_user.role != RoleEnum.ADMIN:
+                raise PermissionError(
+                    status_code=403,
+                    detail="Admin access required",
+                )
+            return await self.delivery_repository.get_all(
+                skip=skip,
+                limit=limit,
+            )

@@ -90,3 +90,20 @@ async def cancel_delivery(
         current_user=current_user,
     )
     
+    
+    
+@router.get(
+    "/deliveries",
+    response_model=list[DeliveryResponse],
+)
+async def get_all_deliveries(
+    current_user: CurrentUser = Depends(get_current_user),
+    service: DeliveryService = Depends(get_delivery_service),
+    skip: int = Query(default=0, ge=0),
+    limit: int = Query(default=10, ge=1, le=100),
+):
+    return await service.get_all(
+        current_user=current_user,
+        skip=skip,
+        limit=limit,
+    )

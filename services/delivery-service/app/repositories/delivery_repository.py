@@ -54,3 +54,21 @@ class DeliveryRepository:
         )
 
         return result.scalars().all()
+    
+    async def get_all(
+        self,
+        skip: int = 0,
+        limit: int = 10,
+    ):
+        stmt = (
+            select(Delivery)
+            .offset(skip)
+            .limit(limit)
+            .order_by(
+                Delivery.created_at.desc()
+            )
+        )
+
+        result = await self.db.execute(stmt)
+
+        return result.scalars().all()
