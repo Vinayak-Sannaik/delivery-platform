@@ -216,7 +216,7 @@ class OrderService:
             str(restaurant_id)
         )
 
-        if restaurant["owner_id"] != current_user.id:
+        if restaurant["owner_id"] != current_user.user_id:
             raise HTTPException(
                 status_code=403,
                 detail="You are not authorized to view these orders.",
