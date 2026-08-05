@@ -215,6 +215,9 @@ class OrderService:
         restaurant = await self.catalog_client.get_restaurant_owner(
             str(restaurant_id)
         )
+        
+        print("Restaurant owner_id:", restaurant["owner_id"])
+        print("Current user_id:", current_user.user_id)
 
         if restaurant["owner_id"] != current_user.user_id:
             raise HTTPException(
