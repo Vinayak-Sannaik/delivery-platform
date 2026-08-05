@@ -7,6 +7,7 @@ from app.routers.catalog import router as catalog_router
 from app.routers.order  import router as order_router
 from app.routers.health  import router as health_router
 from app.routers.system_status import router as system_status
+from app.routers.delivery import router as delivery_router
 
 from app.middleware.auth import AuthenticationMiddleware
 from app.middleware.request_id import RequestIdMiddleware
@@ -38,3 +39,4 @@ app.include_router(auth_router)
 app.include_router(catalog_router)
 app.include_router(order_router)
 app.include_router(health_router)
+app.include_router(delivery_router)
