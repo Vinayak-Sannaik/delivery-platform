@@ -19,6 +19,7 @@ import OrdersPage from "../../modules/orders/pages/OrdersPage";
 import RestaurantOrdersPage from "../../modules/orders/pages/RestaurantOrdersPage";
 import OwnerRestaurantsPage from "../../modules/orders/pages/OwnerRestaurantsPage";
 import DeliveryDashboardPage from "../../modules/delivery/pages/DeliveryDashboardPage"
+import AdminDeliveriesPage from "../../modules/delivery/pages/AdminDeliveriesPage"
 
 export const router = createBrowserRouter([
   // Warmup
@@ -99,6 +100,10 @@ export const router = createBrowserRouter([
           {
   path: "/delivery",
   element: <DeliveryDashboardPage />,
+},
+{
+  path: "/admin/deliveries",
+  element: <AdminDeliveriesPage />,
 }
         ],
       },

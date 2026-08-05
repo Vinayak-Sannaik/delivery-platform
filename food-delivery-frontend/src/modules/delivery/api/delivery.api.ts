@@ -17,6 +17,14 @@ export async function getMyDeliveries() {
   return data;
 }
 
+export async function getAllDeliveries() {
+  const { data } = await apiClient.get(
+    "/api/deliveries"
+  );
+
+  return data;
+}
+
 
 export async function updateDeliveryStatus(
   orderId: string,
