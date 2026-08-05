@@ -16,6 +16,9 @@ import RestaurantsPage from "../../modules/restaurants/pages/RestaurantsPage";
 import RestaurantDetailsPage from "../../modules/restaurants/pages/RestaurantDetailsPage";
 import CartPage from "../../modules/cart/pages/CartPage";
 import OrdersPage from "../../modules/orders/pages/OrdersPage";
+import RestaurantOrdersPage from "../../modules/orders/pages/RestaurantOrdersPage";
+import OwnerRestaurantsPage from "../../modules/orders/pages/OwnerRestaurantsPage";
+import DeliveryDashboardPage from "../../modules/delivery/pages/DeliveryDashboardPage"
 
 export const router = createBrowserRouter([
   // Warmup
@@ -82,9 +85,21 @@ export const router = createBrowserRouter([
             element: <CartPage />,
           },
           {
-        path: "/orders",
-        element: <OrdersPage />,
-      }
+            path: "/orders",
+            element: <OrdersPage />,
+          },
+          {
+            path: "/owner/restaurants",
+            element: <OwnerRestaurantsPage />,
+          },
+          {
+            path: "/owner/restaurants/:restaurantId/orders",
+            element: <RestaurantOrdersPage />,
+          },
+          {
+  path: "/delivery",
+  element: <DeliveryDashboardPage />,
+}
         ],
       },
     ],
