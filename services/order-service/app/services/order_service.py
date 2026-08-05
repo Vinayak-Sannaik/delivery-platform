@@ -204,6 +204,30 @@ class OrderService:
             limit=limit,
         )
         
+    async def get_by_restaurant(
+        self,
+        restaurant_id: UUID,
+        current_user: CurrentUser,
+        skip: int = 0,
+        limit: int = 10,
+    ) -> list[Order]:
+
+        restaurant = await self.catalog_client.get_restaurant_owner(
+            str(restaurant_id)
+        )
+
+        if restaurant["owner_id"] != current_user.id:
+            raise HTTPException(
+                status_code=403,
+                detail="You are not authorized to view these orders.",
+            )
+
+        return await self.order_repository.get_by_restaurant(
+            restaurant_id=restaurant_id,
+            skip=skip,
+            limit=limit,
+        )
+        
     async def update_status(
         self,
         order_id: UUID,

@@ -81,3 +81,22 @@ class OrderRepository:
 
         result = await self.db.execute(stmt)
         return list(result.scalars().all())
+
+    async def get_by_restaurant(
+        self,
+        restaurant_id: UUID,
+        skip: int = 0,
+        limit: int = 10,
+    ) -> list[Order]:
+        stmt = (
+            select(Order)
+            .options(selectinload(Order.items))
+            .where(Order.restaurant_id == restaurant_id)
+            .order_by(Order.created_at.desc())
+            .offset(skip)
+            .limit(limit)
+        )
+
+        result = await self.db.execute(stmt)
+        return result.scalars().all()
+    

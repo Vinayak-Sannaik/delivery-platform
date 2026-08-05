@@ -95,3 +95,21 @@ async def cancel_order(
         order_id=order_id,
         current_user=current_user,
     )
+    
+@router.get(
+    "/restaurant/{restaurant_id}",
+    response_model=list[OrderResponse],
+)
+async def get_restaurant_orders(
+    restaurant_id: UUID,
+    skip: int = Query(0, ge=0),
+    limit: int = Query(10, ge=1, le=100),
+    current_user: CurrentUser = Depends(get_current_user),
+    service: OrderService = Depends(get_order_service),
+):
+    return await service.get_by_restaurant(
+        restaurant_id=restaurant_id,
+        current_user=current_user,
+        skip=skip,
+        limit=limit,
+    )
