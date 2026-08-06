@@ -7,7 +7,7 @@ import asyncio
 from app.core.config import settings
 from app.core.database import AsyncSessionLocal
 from app.repositories.delivery_repository import DeliveryRepository
-from app.schemas.order_created_event import OrderCreatedEvent
+from app.schemas.order_created_event import OrderCreatedEvent, OrderReadyEvent
 from app.services.delivery_service import DeliveryService
 
 from app.repositories.outbox_repository import OutboxRepository
@@ -58,10 +58,29 @@ class OrderCreatedConsumer:
 
         try:
             async for message in self.consumer:
+                print(
+                        f"Kafka message received: {message.value}"
+                    )
 
-                event = OrderCreatedEvent.model_validate(
+                # event = OrderCreatedEvent.model_validate(
+                #     message.value["data"]
+                # )
+                
+                event_type = message.value["event_type"]
+                
+                if event_type != "OrderStatusUpdated":
+                    continue
+
+                event = OrderReadyEvent.model_validate(
                     message.value["data"]
                 )
+                
+                if event.status != "READY":
+                    logger.info(
+                    "Ignoring status %s",
+                    event.status,
+                    )
+                    continue
 
                 max_retries = 3
 

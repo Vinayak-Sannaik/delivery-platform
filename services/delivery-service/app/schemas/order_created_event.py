@@ -19,3 +19,9 @@ class OrderCreatedEvent(BaseModel):
     restaurant_id: UUID
     total_amount: Decimal
     status: str
+    
+class OrderReadyEvent(BaseModel):
+    order_id: UUID
+    customer_id: UUID
+    restaurant_id: UUID
+    status: str
