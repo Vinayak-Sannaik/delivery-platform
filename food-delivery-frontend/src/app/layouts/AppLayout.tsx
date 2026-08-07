@@ -1,7 +1,4 @@
-import {
-  AppShell,
-} from "@mantine/core";
-
+import { AppShell } from "@mantine/core";
 import { Outlet } from "react-router-dom";
 
 import AppHeader from "../../shared/components/AppHeader";
@@ -10,7 +7,9 @@ import AppSidebar from "../../shared/components/AppSidebar";
 import { useUIStore } from "../../shared/store/ui.store";
 
 export default function AppLayout() {
-  const { sidebarOpened } = useUIStore();
+  const sidebarOpened = useUIStore(
+    (state) => state.sidebarOpened
+  );
 
   return (
     <AppShell

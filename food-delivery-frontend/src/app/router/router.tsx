@@ -3,6 +3,7 @@ import { createBrowserRouter } from "react-router-dom";
 import BlankLayout from "../layouts/BlankLayout";
 import AuthLayout from "../layouts/AuthLayout";
 import AppLayout from "../layouts/AppLayout";
+import ProtectedRoute from "./ProtectedRoute";
 
 import LoginPage from "../../modules/auth/pages/LoginPage";
 import RegisterPage from "../../modules/auth/pages/RegisterPage";
@@ -10,19 +11,22 @@ import RegisterPage from "../../modules/auth/pages/RegisterPage";
 import WarmupPage from "../../modules/health/pages/WarmupPage";
 import DashboardPage from "../../modules/dashboard/pages/DashboardPage";
 
-import ProtectedRoute from "./ProtectedRoute";
-
 import RestaurantsPage from "../../modules/restaurants/pages/RestaurantsPage";
 import RestaurantDetailsPage from "../../modules/restaurants/pages/RestaurantDetailsPage";
+
 import CartPage from "../../modules/cart/pages/CartPage";
 import OrdersPage from "../../modules/orders/pages/OrdersPage";
+
 import RestaurantOrdersPage from "../../modules/orders/pages/RestaurantOrdersPage";
 import OwnerRestaurantsPage from "../../modules/orders/pages/OwnerRestaurantsPage";
-import DeliveryDashboardPage from "../../modules/delivery/pages/DeliveryDashboardPage"
-import AdminDeliveriesPage from "../../modules/delivery/pages/AdminDeliveriesPage"
+
+import DeliveryDashboardPage from "../../modules/delivery/pages/DeliveryDashboardPage";
+import AdminDeliveriesPage from "../../modules/delivery/pages/AdminDeliveriesPage";
 
 export const router = createBrowserRouter([
+  // --------------------------------------------------
   // Warmup
+  // --------------------------------------------------
   {
     element: <BlankLayout />,
     children: [
@@ -33,7 +37,9 @@ export const router = createBrowserRouter([
     ],
   },
 
+  // --------------------------------------------------
   // Authentication
+  // --------------------------------------------------
   {
     element: <AuthLayout />,
     children: [
@@ -48,31 +54,22 @@ export const router = createBrowserRouter([
     ],
   },
 
-  // Application
+  // --------------------------------------------------
+  // Protected Application
+  // --------------------------------------------------
   {
     element: <ProtectedRoute />,
     children: [
       {
         element: <AppLayout />,
         children: [
+          // Dashboard
           {
             path: "/dashboard",
             element: <DashboardPage />,
           },
-        ],
-      },
-    ],
-  },
-  {
-    element: <ProtectedRoute />,
-    children: [
-      {
-        element: <AppLayout />,
-        children: [
-          {
-            path: "/dashboard",
-            element: <DashboardPage />,
-          },
+
+          // Customer
           {
             path: "/restaurants",
             element: <RestaurantsPage />,
@@ -89,6 +86,8 @@ export const router = createBrowserRouter([
             path: "/orders",
             element: <OrdersPage />,
           },
+
+          // Restaurant Owner
           {
             path: "/owner/restaurants",
             element: <OwnerRestaurantsPage />,
@@ -97,14 +96,18 @@ export const router = createBrowserRouter([
             path: "/owner/restaurants/:restaurantId/orders",
             element: <RestaurantOrdersPage />,
           },
+
+          // Delivery Partner
           {
-  path: "/delivery",
-  element: <DeliveryDashboardPage />,
-},
-{
-  path: "/admin/deliveries",
-  element: <AdminDeliveriesPage />,
-}
+            path: "/delivery",
+            element: <DeliveryDashboardPage />,
+          },
+
+          // Admin
+          {
+            path: "/admin/deliveries",
+            element: <AdminDeliveriesPage />,
+          },
         ],
       },
     ],

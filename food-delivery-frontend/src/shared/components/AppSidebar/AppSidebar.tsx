@@ -6,15 +6,23 @@ import {
 import { NavLink as RouterLink } from "react-router-dom";
 
 import { navigation } from "../../constants/navigation";
-import { UserRole } from "../../../app/router/route.types";
+import { useAuthStore } from "../../../modules/auth/store/auth.store";
 
 export default function AppSidebar() {
-  const role = UserRole.ADMIN;
+  const user = useAuthStore(
+    (state) => state.user
+  );
+
+  if (!user) {
+    return null;
+  }
 
   return (
     <Stack gap={4}>
       {navigation
-        .filter((item) => item.roles.includes(role))
+        .filter((item) =>
+          item.roles.includes(user.role)
+        )
         .map((item) => {
           const Icon = item.icon;
 
