@@ -16,6 +16,7 @@ from datetime import UTC, datetime, timedelta
 
 from app.core.config import settings
 from app.models.refresh_token import RefreshToken
+from app.models.user import RoleEnum
 
 password_hash = PasswordHash.recommended()
 
@@ -45,6 +46,7 @@ class AuthService:
             first_name=request.first_name,
             last_name=request.last_name,
             phone=request.phone,
+            role=RoleEnum(request.role.value)
         )
 
         try:

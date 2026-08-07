@@ -1,6 +1,10 @@
 from pydantic import BaseModel, EmailStr, Field
 from uuid import UUID
 from app.models.user import RoleEnum
+from enum import Enum
+class SignupRole(str, Enum):
+    CUSTOMER = "CUSTOMER"
+    RESTAURANT_OWNER = "RESTAURANT_OWNER"
 
 class SignupRequest(BaseModel):
     email: EmailStr
@@ -8,6 +12,7 @@ class SignupRequest(BaseModel):
     first_name: str = Field(min_length=1, max_length=100)
     last_name: str = Field(min_length=1, max_length=100)
     phone: str = Field(min_length=10, max_length=20)
+    role: SignupRole = SignupRole.CUSTOMER
 
 
 class SignupResponse(BaseModel):
@@ -15,6 +20,7 @@ class SignupResponse(BaseModel):
     email: EmailStr
     first_name: str
     last_name: str
+    role: RoleEnum
 
 class LoginRequest(BaseModel):
     email: EmailStr
