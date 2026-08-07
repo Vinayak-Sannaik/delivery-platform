@@ -1,5 +1,6 @@
 import {
   Badge,
+  Button,
   Card,
   Group,
   Loader,
@@ -7,9 +8,10 @@ import {
   Text,
   Title,
 } from "@mantine/core";
+import { useState } from "react";
 
 import { useAllDeliveries } from "../hooks/useAllDeliveries";
-
+import { useUpdateDeliveryStatus } from "../hooks/useUpdateDeliveryStatus";
 
 const statusColor: Record<string, string> = {
   PENDING: "yellow",
@@ -19,67 +21,138 @@ const statusColor: Record<string, string> = {
   CANCELLED: "red",
 };
 
-
 export default function AdminDeliveriesPage() {
+  const { data, isLoading } = useAllDeliveries();
 
-  const {
-    data,
-    isLoading,
-  } = useAllDeliveries();
+  const updateStatus = useUpdateDeliveryStatus();
 
+  const [loadingOrderId, setLoadingOrderId] =
+    useState<string | null>(null);
+
+  const handleStatusUpdate = (
+    orderId: string,
+    status: string,
+  ) => {
+    setLoadingOrderId(orderId);
+
+    updateStatus.mutate(
+      {
+        orderId,
+        status,
+      },
+      {
+        onSettled: () => {
+          setLoadingOrderId(null);
+        },
+      }
+    );
+  };
 
   if (isLoading) {
     return <Loader />;
   }
 
-
   return (
     <Stack>
-
       <Title order={2}>
         All Deliveries
       </Title>
 
-
       {data?.map((delivery) => (
-
         <Card
           key={delivery.id}
           withBorder
+          shadow="sm"
         >
+          <Stack>
 
-          <Group justify="space-between">
+            <Group justify="space-between">
+              <Stack gap={4}>
+                <Text fw={600}>
+                  Order #
+                  {delivery.order_id.slice(0, 8)}
+                </Text>
 
-            <Stack gap={4}>
-              <Text fw={600}>
-                Order #
-                {delivery.order_id.slice(0, 8)}
-              </Text>
+                <Text size="sm">
+                  Partner:{" "}
+                  {delivery.delivery_partner_id ??
+                    "Not Assigned"}
+                </Text>
+              </Stack>
 
-              <Text size="sm">
-                Partner:
-                {" "}
-                {delivery.delivery_partner_id}
-              </Text>
-            </Stack>
+              <Badge
+                color={
+                  statusColor[
+                    delivery.status
+                  ] ?? "gray"
+                }
+              >
+                {delivery.status}
+              </Badge>
+            </Group>
 
+            <Group mt="md">
 
-            <Badge
-              color={
-                statusColor[
-                  delivery.status
-                ] ?? "gray"
-              }
-            >
-              {delivery.status}
-            </Badge>
+              {delivery.status ===
+                "PENDING" && (
+                <Button
+                  loading={
+                    loadingOrderId ===
+                    delivery.order_id
+                  }
+                  onClick={() =>
+                    handleStatusUpdate(
+                      delivery.order_id,
+                      "ASSIGNED"
+                    )
+                  }
+                >
+                  Assign
+                </Button>
+              )}
 
-          </Group>
+              {delivery.status ===
+                "ASSIGNED" && (
+                <Button
+                  loading={
+                    loadingOrderId ===
+                    delivery.order_id
+                  }
+                  onClick={() =>
+                    handleStatusUpdate(
+                      delivery.order_id,
+                      "PICKED_UP"
+                    )
+                  }
+                >
+                  Pick Up
+                </Button>
+              )}
 
+              {delivery.status ===
+                "PICKED_UP" && (
+                <Button
+                  color="green"
+                  loading={
+                    loadingOrderId ===
+                    delivery.order_id
+                  }
+                  onClick={() =>
+                    handleStatusUpdate(
+                      delivery.order_id,
+                      "DELIVERED"
+                    )
+                  }
+                >
+                  Delivered
+                </Button>
+              )}
+
+            </Group>
+
+          </Stack>
         </Card>
-
       ))}
-
     </Stack>
   );
 }

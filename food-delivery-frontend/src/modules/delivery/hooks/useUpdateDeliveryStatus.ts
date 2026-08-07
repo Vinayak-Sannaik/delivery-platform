@@ -5,9 +5,7 @@ import {
 
 import { updateDeliveryStatus } from "../api/delivery.api";
 
-
 export function useUpdateDeliveryStatus() {
-
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -26,6 +24,10 @@ export function useUpdateDeliveryStatus() {
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ["my-deliveries"],
+      });
+
+      queryClient.invalidateQueries({
+        queryKey: ["all-deliveries"],
       });
     },
   });
