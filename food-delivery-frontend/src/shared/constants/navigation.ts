@@ -3,8 +3,8 @@ import {
   IconBuildingStore,
   IconClipboardList,
   IconTruckDelivery,
-  IconActivity,
-  IconSettings,
+  // IconActivity,
+  // IconSettings,
 } from "@tabler/icons-react";
 
 import type { TablerIcon } from "@tabler/icons-react";
@@ -53,22 +53,22 @@ export const navigation: NavigationItem[] = [
     roles: [UserRole.DELIVERY_PARTNER],
   },
 
-  {
-    label: "System Health",
-    path: "/health",
-    icon: IconActivity,
-    roles: [UserRole.ADMIN],
-  },
+  // {
+  //   label: "System Health",
+  //   path: "/health",
+  //   icon: IconActivity,
+  //   roles: [UserRole.ADMIN],
+  // },
 
-  {
-    label: "Settings",
-    path: "/settings",
-    icon: IconSettings,
-    roles: [
-      UserRole.ADMIN,
-      UserRole.CUSTOMER,
-      UserRole.RESTAURANT_OWNER,
-      UserRole.DELIVERY_PARTNER,
-    ],
-  },
+  // {
+  //   label: "Settings",
+  //   path: "/settings",
+  //   icon: IconSettings,
+  //   roles: [
+  //     UserRole.ADMIN,
+  //     UserRole.CUSTOMER,
+  //     UserRole.RESTAURANT_OWNER,
+  //     UserRole.DELIVERY_PARTNER,
+  //   ],
+  // },
 ];

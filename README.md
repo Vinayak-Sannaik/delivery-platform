@@ -11,9 +11,10 @@ The project is designed using industry-standard architecture while remaining sim
 | Service | Status | Live |
 |----------|--------|------|
 | Identity Service | ✅ Live | https://delivery-platform-xo8w.onrender.com/docs |
-| Catalog Service | 🚧 In Progress | - |
-| Order Service | 📋 Planned | - |
-| Delivery Service | 📋 Planned | - |
+| Catalog Service | ✅ Live | https://food-catalog-service.onrender.com/docs |
+| Order Service | ✅ Live | https://delivery-platform-oezs.onrender.com/docs|
+| Delivery Service | ✅ Live | https://delivery-service-nzxj.onrender.com/docs |
+| Notification Service | ✅ Live | https://delivery-platform-dzuv.onrender.com/docs |
 
 ---
 
@@ -239,14 +240,14 @@ docker compose up --build
 # Roadmap
 
 - [x] Identity Service
-- [ ] Catalog Service
-- [ ] Order Service
-- [ ] Delivery Service
-- [ ] API Gateway
-- [ ] Redis Integration
-- [ ] Kafka Integration
+- [x] Catalog Service
+- [x] Order Service
+- [x] Delivery Service
+- [x] API Gateway
+- [x] Redis Integration
+- [x] Kafka Integration
 - [ ] Background Jobs
-- [ ] Monitoring
+- [x] Monitoring
 - [ ] CI/CD Pipeline
 - [ ] Kubernetes Deployment
 
