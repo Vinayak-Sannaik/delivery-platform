@@ -10,6 +10,8 @@ from app.routers.restaurant import router as restaurant_router
 from app.routers.internal import router as internal_router
 from app.middleware.request_id import RequestIdMiddleware
 
+from app.core.redis import redis_client
+
 setup_logging()
 
 @asynccontextmanager
@@ -39,3 +41,21 @@ app.include_router(internal_router)
 @app.get("/health")
 def health():
     return {"status": "healthy"}
+
+
+@app.get("/redis-test")
+def redis_test():
+
+    redis_client.set(
+        "catalog:test",
+        "redis-working",
+        ex=60,
+    )
+
+    value = redis_client.get(
+        "catalog:test"
+    )
+
+    return {
+        "redis": value,
+    }
