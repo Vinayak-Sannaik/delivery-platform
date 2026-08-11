@@ -1,36 +1,45 @@
+import asyncio
 import json
+import logging
 import ssl
 
 from aiokafka import AIOKafkaConsumer
-import asyncio
 
 from app.core.config import settings
 from app.core.database import AsyncSessionLocal
-from app.repositories.delivery_repository import DeliveryRepository
-from app.schemas.order_created_event import OrderCreatedEvent, OrderReadyEvent
-from app.services.delivery_service import DeliveryService
-
-from app.repositories.outbox_repository import OutboxRepository
-from app.services.outbox_service import OutboxService
-
-from app.repositories.delivery_partner_repository import DeliveryPartnerRepository
-from app.services.assignment_service import AssignmentService
 
 from app.kafka.dlq_producer import DLQProducer
 
-import logging
+from app.repositories.delivery_partner_repository import (
+    DeliveryPartnerRepository,
+)
+from app.repositories.delivery_repository import DeliveryRepository
+from app.repositories.outbox_repository import OutboxRepository
+
+from app.schemas.order_created_event import OrderReadyEvent
+
+from app.services.assignment_service import AssignmentService
+from app.services.delivery_service import DeliveryService
+from app.services.outbox_service import OutboxService
+
 
 logger = logging.getLogger(__name__)
 
 
 class OrderCreatedConsumer:
+
     def __init__(self):
+
         kwargs = {
             "bootstrap_servers": settings.KAFKA_BOOTSTRAP_SERVERS,
             "group_id": "delivery-service",
-            "value_deserializer": lambda v: json.loads(v.decode("utf-8")),
+            "value_deserializer": lambda v: json.loads(
+                v.decode("utf-8")
+            ),
         }
+
         if settings.KAFKA_SECURITY_PROTOCOL == "SASL_SSL":
+
             ssl_context = ssl.create_default_context(
                 cafile=settings.KAFKA_SSL_CA_LOCATION
             )
@@ -49,109 +58,219 @@ class OrderCreatedConsumer:
             "orders",
             **kwargs,
         )
-        
+
         self.dlq_producer = DLQProducer()
 
     async def start(self):
+
         await self.consumer.start()
         await self.dlq_producer.start()
 
+        logger.info(
+            "Delivery order consumer started"
+        )
+
         try:
+
             async for message in self.consumer:
-                print(
-                        f"Kafka message received: {message.value}"
-                    )
 
-                # event = OrderCreatedEvent.model_validate(
-                #     message.value["data"]
-                # )
-                
-                event_type = message.value["event_type"]
-                
-                if event_type != "OrderStatusUpdated":
-                    continue
+                try:
 
-                event = OrderReadyEvent.model_validate(
-                    message.value["data"]
-                )
-                
-                if event.status != "READY":
+                    payload = message.value
+
                     logger.info(
-                    "Ignoring status %s",
-                    event.status,
+                        "Kafka event received: %s",
+                        payload,
                     )
-                    continue
 
-                max_retries = 3
+                    # --------------------------------
+                    # 1. Read event type
+                    # --------------------------------
 
-                for attempt in range(1, max_retries + 1):
-                    try:
+                    event_type = payload.get(
+                        "event_type"
+                    )
+
+                    logger.info(
+                        "Event type: %s",
+                        event_type,
+                    )
+
+                    # --------------------------------
+                    # 2. Ignore events we don't handle
+                    # --------------------------------
+
+                    if event_type != "OrderStatusUpdated":
+
                         logger.info(
-                            "Kafka message received: %s",
-                            message.value,
+                            "Ignoring event type: %s",
+                            event_type,
                         )
-                        
-                        async with AsyncSessionLocal() as db:
 
-                            outbox_repository = OutboxRepository(db)
+                        continue
 
-                            outbox_service = OutboxService(
-                                outbox_repository=outbox_repository,
-                            )
+                    # --------------------------------
+                    # 3. Validate event data
+                    # --------------------------------
 
-                            delivery_repository = DeliveryRepository(db)
+                    event = OrderReadyEvent.model_validate(
+                        payload["data"]
+                    )
 
-                            delivery_partner_repository = (
-                                DeliveryPartnerRepository(db)
-                            )
+                    logger.info(
+                        "Order status event received: "
+                        "order=%s status=%s",
+                        event.order_id,
+                        event.status,
+                    )
 
-                            assignment_service = AssignmentService(
-                                delivery_repository=delivery_repository,
-                                delivery_partner_repository=delivery_partner_repository,
-                                outbox_service=outbox_service,
-                            )
+                    # --------------------------------
+                    # 4. Only READY creates delivery
+                    # --------------------------------
 
-                            service = DeliveryService(
-                                delivery_repository=delivery_repository,
-                                outbox_service=outbox_service,
-                                assignment_service=assignment_service,
-                                delivery_partner_repository=delivery_partner_repository,
-                            )
-
-                            await service.create_from_order(event)
-
-                            await db.commit()
+                    if event.status != "READY":
 
                         logger.info(
-                            "Delivery created for order: %s",
+                            "Ignoring order %s because "
+                            "status is %s",
                             event.order_id,
+                            event.status,
                         )
 
-                        # Success
-                        break
+                        continue
 
-                    except Exception as e:
-                        logger.exception(
-                            "Attempt %s/%s failed",
-                            attempt,
-                            max_retries,
-                        )
+                    # --------------------------------
+                    # 5. Process with retry
+                    # --------------------------------
 
-                        if attempt == max_retries:
+                    max_retries = 3
 
-                            await self.dlq_producer.publish(
-                                "orders-dlq",
-                                {
-                                    "original_topic": "orders",
-                                    "retry_count": attempt,
-                                    "error": str(e),
-                                    "event": message.value,
-                                },
+                    for attempt in range(
+                        1,
+                        max_retries + 1,
+                    ):
+
+                        try:
+
+                            async with AsyncSessionLocal() as db:
+
+                                # ----------------------------
+                                # Repositories
+                                # ----------------------------
+
+                                outbox_repository = (
+                                    OutboxRepository(db)
+                                )
+
+                                delivery_repository = (
+                                    DeliveryRepository(db)
+                                )
+
+                                delivery_partner_repository = (
+                                    DeliveryPartnerRepository(db)
+                                )
+
+                                # ----------------------------
+                                # Services
+                                # ----------------------------
+
+                                outbox_service = (
+                                    OutboxService(
+                                        outbox_repository=
+                                        outbox_repository,
+                                    )
+                                )
+
+                                assignment_service = (
+                                    AssignmentService(
+                                        delivery_repository=
+                                        delivery_repository,
+
+                                        delivery_partner_repository=
+                                        delivery_partner_repository,
+
+                                        outbox_service=
+                                        outbox_service,
+                                    )
+                                )
+
+                                service = DeliveryService(
+                                    delivery_repository=
+                                    delivery_repository,
+
+                                    outbox_service=
+                                    outbox_service,
+
+                                    assignment_service=
+                                    assignment_service,
+
+                                    delivery_partner_repository=
+                                    delivery_partner_repository,
+                                )
+
+                                # ----------------------------
+                                # Create delivery
+                                # ----------------------------
+
+                                await service.create_from_order(
+                                    event
+                                )
+
+                                await db.commit()
+
+                            logger.info(
+                                "Delivery successfully created "
+                                "for order %s",
+                                event.order_id,
                             )
 
-                        else:
-                            await asyncio.sleep(2 ** attempt)
+                            break
+
+                        except Exception as exc:
+
+                            logger.exception(
+                                "Delivery processing failed "
+                                "attempt %s/%s",
+                                attempt,
+                                max_retries,
+                            )
+
+                            if attempt == max_retries:
+
+                                await self.dlq_producer.publish(
+                                    "orders-dlq",
+                                    {
+                                        "original_topic": "orders",
+                                        "retry_count": attempt,
+                                        "error": str(exc),
+                                        "event": payload,
+                                    },
+                                )
+
+                                logger.error(
+                                    "Event moved to DLQ "
+                                    "after %s attempts",
+                                    max_retries,
+                                )
+
+                            else:
+
+                                await asyncio.sleep(
+                                    2 ** attempt
+                                )
+
+                except Exception:
+
+                    logger.exception(
+                        "Unexpected error while processing "
+                        "Kafka message"
+                    )
 
         finally:
+
             await self.consumer.stop()
             await self.dlq_producer.stop()
+
+            logger.info(
+                "Delivery order consumer stopped"
+            )
