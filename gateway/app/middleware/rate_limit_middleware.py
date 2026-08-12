@@ -1,14 +1,15 @@
+from fastapi import Request
+from fastapi.responses import JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware
-from starlette.requests import Request
-from starlette.responses import JSONResponse
 
 from app.core.redis import redis_client
 
 
-class RateLimitMiddleware(BaseHTTPMiddleware):
+RATE_LIMIT = 100
+WINDOW_SECONDS = 60
 
-    RATE_LIMIT = 100
-    WINDOW_SECONDS = 60
+
+class RateLimitMiddleware(BaseHTTPMiddleware):
 
     async def dispatch(
         self,
@@ -21,38 +22,37 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
             else "unknown"
         )
 
-        key = f"rate_limit:{client_ip}"
+        key = f"rate_limit:ip:{client_ip}"
 
-        current_count = await redis_client.incr(key)
+        current_count = redis_client.incr(key)
 
         if current_count == 1:
-            await redis_client.expire(
+            redis_client.expire(
                 key,
-                self.WINDOW_SECONDS,
+                WINDOW_SECONDS,
             )
 
-        if current_count > self.RATE_LIMIT:
+        if current_count > RATE_LIMIT:
             return JSONResponse(
                 status_code=429,
                 content={
                     "detail": "Too many requests. Please try again later."
                 },
                 headers={
-                    "Retry-After": str(self.WINDOW_SECONDS),
+                    "Retry-After": str(WINDOW_SECONDS),
+                    "X-RateLimit-Limit": str(RATE_LIMIT),
+                    "X-RateLimit-Remaining": "0",
                 },
             )
 
         response = await call_next(request)
 
         response.headers["X-RateLimit-Limit"] = str(
-            self.RATE_LIMIT
+            RATE_LIMIT
         )
 
         response.headers["X-RateLimit-Remaining"] = str(
-            max(
-                0,
-                self.RATE_LIMIT - current_count,
-            )
+            max(0, RATE_LIMIT - current_count)
         )
 
         return response
