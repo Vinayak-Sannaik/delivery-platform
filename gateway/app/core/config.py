@@ -10,6 +10,7 @@ class Settings(BaseSettings):
     NOTIFICATION_SERVICE_URL: str
     
     REDIS_URL: str
+    REDIS_TOKEN: str
     
     JWT_SECRET_KEY: str
     JWT_ALGORITHM: str
