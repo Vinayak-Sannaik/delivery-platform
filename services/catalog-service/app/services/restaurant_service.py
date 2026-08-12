@@ -1,3 +1,4 @@
+import json
 from uuid import UUID
 
 from fastapi import HTTPException, status, Request
@@ -5,10 +6,11 @@ from fastapi import HTTPException, status, Request
 from app.models.restaurant import Restaurant
 from app.repositories.restaurant_repository import RestaurantRepository
 from app.services.authorization_service import AuthorizationService
-from app.schemas.restaurant import RestaurantCreate, RestaurantUpdate
+from app.schemas.restaurant import RestaurantCreate, RestaurantUpdate, RestaurantResponse
 from app.repositories.idempotency_repository import IdempotencyRepository
 from app.schemas.auth import CurrentUser
-from app.models.user import RoleEnum
+
+from app.core.redis import redis_client, get_restaurant_cache_key, RESTAURANT_CACHE_TTL
 
 
 class RestaurantService:
@@ -81,8 +83,29 @@ class RestaurantService:
     def get_by_id(
         self,
         restaurant_id: UUID,
-    ) -> Restaurant:
-        restaurant = self.repository.get_by_id(restaurant_id)
+    ) -> RestaurantResponse:
+
+        cache_key = get_restaurant_cache_key(
+            str(restaurant_id)
+        )
+
+        # -----------------------------
+        # 1. Redis cache lookup
+        # -----------------------------
+        cached = redis_client.get(cache_key)
+
+        if cached:
+            print("FROM CACHE")
+            return RestaurantResponse.model_validate_json(
+                cached
+            )
+
+        # -----------------------------
+        # 2. PostgreSQL fallback
+        # -----------------------------
+        restaurant = self.repository.get_by_id(
+            restaurant_id
+        )
 
         if restaurant is None:
             raise HTTPException(
@@ -90,7 +113,23 @@ class RestaurantService:
                 detail="Restaurant not found.",
             )
 
-        return restaurant
+        response = RestaurantResponse.model_validate(
+            restaurant,
+            from_attributes=True,
+        )
+        
+        print("FROM DB")
+
+        # -----------------------------
+        # 3. Store in Redis
+        # -----------------------------
+        redis_client.setex(
+            cache_key,
+            RESTAURANT_CACHE_TTL,
+            response.model_dump_json(),
+        )
+
+        return response
 
     def get_all(
         self,
@@ -107,26 +146,45 @@ class RestaurantService:
         restaurant_data: RestaurantUpdate,
         current_user: CurrentUser,
     ) -> Restaurant:
-        restaurant = self.get_by_id(restaurant_id)
+
+        restaurant = self.get_by_id_from_database(
+            restaurant_id
+        )
 
         self.authorization_service.authorize_restaurant_owner(
             restaurant,
             current_user,
         )
 
-        update_data = restaurant_data.model_dump(exclude_unset=True)
+        update_data = restaurant_data.model_dump(
+            exclude_unset=True
+        )
 
         for key, value in update_data.items():
             setattr(restaurant, key, value)
 
-        return self.repository.update(restaurant)
+        updated_restaurant = self.repository.update(
+            restaurant
+        )
+
+        # Invalidate stale cache
+        cache_key = get_restaurant_cache_key(
+            str(restaurant_id)
+        )
+
+        redis_client.delete(cache_key)
+
+        return updated_restaurant
 
     def delete(
         self,
         restaurant_id: UUID,
         current_user: CurrentUser,
     ) -> None:
-        restaurant = self.get_by_id(restaurant_id)
+
+        restaurant = self.get_by_id_from_database(
+            restaurant_id
+        )
 
         self.authorization_service.authorize_restaurant_owner(
             restaurant,
@@ -134,3 +192,27 @@ class RestaurantService:
         )
 
         self.repository.delete(restaurant)
+
+        # Remove stale cache
+        cache_key = get_restaurant_cache_key(
+            str(restaurant_id)
+        )
+
+        redis_client.delete(cache_key)
+
+    def get_by_id_from_database(
+        self,
+        restaurant_id: UUID,
+    ) -> Restaurant:
+
+        restaurant = self.repository.get_by_id(
+            restaurant_id
+        )
+
+        if restaurant is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Restaurant not found.",
+            )
+
+        return restaurant
