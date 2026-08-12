@@ -12,6 +12,7 @@ from app.routers.delivery import router as delivery_router
 from app.middleware.auth import AuthenticationMiddleware
 from app.middleware.request_id import RequestIdMiddleware
 from fastapi.middleware.cors import CORSMiddleware
+from app.middleware.rate_limit_middleware import RateLimitMiddleware
 
 
 setup_logging()
@@ -31,6 +32,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.add_middleware(RateLimitMiddleware)
 app.add_middleware(RequestIdMiddleware)
 app.add_middleware(AuthenticationMiddleware)
 

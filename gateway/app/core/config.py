@@ -9,6 +9,7 @@ class Settings(BaseSettings):
     DELIVERY_SERVICE_URL: str
     NOTIFICATION_SERVICE_URL: str
     
+    REDIS_URL: str
     
     JWT_SECRET_KEY: str
     JWT_ALGORITHM: str
