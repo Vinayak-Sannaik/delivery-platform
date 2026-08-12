@@ -10,8 +10,7 @@ from app.schemas.restaurant import RestaurantCreate, RestaurantUpdate, Restauran
 from app.repositories.idempotency_repository import IdempotencyRepository
 from app.schemas.auth import CurrentUser
 
-from app.core.redis import redis_client, get_restaurant_cache_key, RESTAURANT_CACHE_TTL
-
+from app.core.redis import redis_client, get_restaurant_cache_key, RESTAURANT_CACHE_TTL, get_restaurants_list_cache_key, invalidate_restaurant_list_cache
 
 class RestaurantService:
     def __init__(
@@ -77,8 +76,14 @@ class RestaurantService:
             owner_id=owner_id,
             **restaurant_data.model_dump(),
         )
+        
+        created_restaurant = self.repository.create(
+            restaurant
+        )
 
-        return self.repository.create(restaurant)
+        invalidate_restaurant_list_cache()
+
+        return created_restaurant
 
     def get_by_id(
         self,
@@ -137,8 +142,58 @@ class RestaurantService:
         is_active: bool | None = None,
         skip: int = 0,
         limit: int = 10,
-    ) -> list[Restaurant]:
-        return self.repository.get_all(name = name, is_active = is_active, skip=skip, limit=limit)
+    ) -> list[RestaurantResponse]:
+
+        cache_key = get_restaurants_list_cache_key(
+            name=name,
+            is_active=is_active,
+            skip=skip,
+            limit=limit,
+        )
+
+        # -----------------------------
+        # Redis HIT
+        # -----------------------------
+        cached = redis_client.get(cache_key)
+        if cached:
+            return [
+                RestaurantResponse.model_validate(item)
+                for item in json.loads(cached)
+            ]
+
+        # -----------------------------
+        # Redis MISS → PostgreSQL
+        # -----------------------------
+        restaurants = self.repository.get_all(
+            name=name,
+            is_active=is_active,
+            skip=skip,
+            limit=limit,
+        )
+
+        response = [
+            RestaurantResponse.model_validate(
+                restaurant,
+                from_attributes=True,
+            )
+            for restaurant in restaurants
+        ]
+
+        # -----------------------------
+        # Store in Redis
+        # -----------------------------
+        redis_client.setex(
+            cache_key,
+            RESTAURANT_CACHE_TTL,
+            json.dumps(
+                [
+                    item.model_dump(mode="json")
+                    for item in response
+                ]
+            ),
+        )
+
+        return response
 
     def update(
         self,
@@ -171,6 +226,8 @@ class RestaurantService:
         cache_key = get_restaurant_cache_key(
             str(restaurant_id)
         )
+        
+        invalidate_restaurant_list_cache()
 
         redis_client.delete(cache_key)
 
@@ -197,8 +254,8 @@ class RestaurantService:
         cache_key = get_restaurant_cache_key(
             str(restaurant_id)
         )
-
         redis_client.delete(cache_key)
+        invalidate_restaurant_list_cache()
 
     def get_by_id_from_database(
         self,
