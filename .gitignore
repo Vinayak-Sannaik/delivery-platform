@@ -8,3 +8,5 @@ __pycache__/
 .pytest_cache/
 .DS_Store
 credentials.json
+
+txt.md
