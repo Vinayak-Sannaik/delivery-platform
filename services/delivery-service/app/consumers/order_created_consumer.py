@@ -21,7 +21,7 @@ from app.schemas.order_created_event import OrderReadyEvent
 from app.services.assignment_service import AssignmentService
 from app.services.delivery_service import DeliveryService
 from app.services.outbox_service import OutboxService
-
+from app.services.redis_lock_service import RedisLockService
 
 logger = logging.getLogger(__name__)
 
@@ -169,6 +169,8 @@ class OrderCreatedConsumer:
                                 delivery_partner_repository = (
                                     DeliveryPartnerRepository(db)
                                 )
+                                
+                                redis_lock_service = RedisLockService()
 
                                 # ----------------------------
                                 # Services
@@ -191,6 +193,8 @@ class OrderCreatedConsumer:
 
                                         outbox_service=
                                         outbox_service,
+                                        
+                                        redis_lock_service=redis_lock_service,
                                     )
                                 )
 
