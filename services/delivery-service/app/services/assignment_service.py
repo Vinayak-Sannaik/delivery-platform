@@ -1,4 +1,5 @@
 from fastapi import HTTPException
+import asyncio
 
 from app.models.delivery_status import DeliveryStatus
 from app.repositories.delivery_partner_repository import (
@@ -46,6 +47,9 @@ class AssignmentService:
                 status_code=409,
                 detail="Delivery is currently being assigned.",
             )
+        
+        print(f"LOCK ACQUIRED: {lock_token}")
+        await asyncio.sleep(5)
 
         try:
             # Check again after acquiring the lock.
