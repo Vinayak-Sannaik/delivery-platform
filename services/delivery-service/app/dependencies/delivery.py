@@ -9,6 +9,7 @@ from app.repositories.outbox_repository import OutboxRepository
 from app.services.delivery_service import DeliveryService
 from app.services.assignment_service import AssignmentService
 from app.services.outbox_service import OutboxService
+from app.services.redis_lock_service import RedisLockService
 
 
 async def get_delivery_service(
@@ -24,11 +25,14 @@ async def get_delivery_service(
     outbox_service = OutboxService(
         outbox_repository=outbox_repository,
     )
+    
+    redis_lock_service = RedisLockService()
 
     assignment_service = AssignmentService(
         delivery_repository=delivery_repository,
         delivery_partner_repository=delivery_partner_repository,
         outbox_service=outbox_service,
+        redis_lock_service=redis_lock_service
     )
 
     return DeliveryService(
