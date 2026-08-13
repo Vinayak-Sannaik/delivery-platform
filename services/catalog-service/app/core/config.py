@@ -12,6 +12,7 @@ class Settings(BaseSettings):
     JWT_ALGORITHM: str
 
     REDIS_URL: str
+    REDIS_TOKEN: str
 
     model_config = SettingsConfigDict(
         env_file=".env",
