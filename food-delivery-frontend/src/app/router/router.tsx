@@ -20,6 +20,7 @@ import CategoryFormPage from "../../modules/categories/pages/CategoryFormPage";
 
 import RestaurantFormPage from "../../modules/restaurants/pages/RestaurantFormPage";
 
+
 import CartPage from "../../modules/cart/pages/CartPage";
 import OrdersPage from "../../modules/orders/pages/OrdersPage";
 
@@ -28,6 +29,8 @@ import OwnerRestaurantsPage from "../../modules/orders/pages/OwnerRestaurantsPag
 
 import DeliveryDashboardPage from "../../modules/delivery/pages/DeliveryDashboardPage";
 import AdminDeliveriesPage from "../../modules/delivery/pages/AdminDeliveriesPage";
+import ManageMenuItemsPage from "../../modules/menu/pages/ManageMenuItemsPage";
+import MenuItemFormPage from "../../modules/menu/pages/MenuItemFormPage";
 
 export const router = createBrowserRouter([
   // --------------------------------------------------
@@ -129,6 +132,19 @@ export const router = createBrowserRouter([
             path: "/admin/categories/:id/edit",
             element: <CategoryFormPage />,
           },
+
+          {
+  path: "/admin/menu-items",
+  element: <ManageMenuItemsPage />,
+},
+{
+  path: "/admin/menu-items/new",
+  element: <MenuItemFormPage />,
+},
+{
+  path: "/admin/menu-items/:id/edit",
+  element: <MenuItemFormPage />,
+},
 
           // Delivery Partner
           {
