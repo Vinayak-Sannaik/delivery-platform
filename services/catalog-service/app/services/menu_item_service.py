@@ -229,7 +229,9 @@ class MenuItemService:
         current_user: CurrentUser,
     ) -> MenuItem:
 
-        menu_item = self.get_by_id(menu_item_id)
+        menu_item = self._get_by_id_from_database(
+            menu_item_id
+        )
 
         self.authorization_service.authorize_restaurant_owner(
             menu_item.category.restaurant,
@@ -253,7 +255,9 @@ class MenuItemService:
                     detail="Menu item already exists.",
                 )
 
-        update_data = menu_item_data.model_dump(exclude_unset=True)
+        update_data = menu_item_data.model_dump(
+            exclude_unset=True
+        )
 
         for key, value in update_data.items():
             setattr(menu_item, key, value)
@@ -262,25 +266,29 @@ class MenuItemService:
             menu_item
         )
 
+        # Invalidate individual menu item cache
         redis_client.delete(
             get_menu_item_cache_key(
                 str(menu_item_id)
             )
         )
 
+        # Invalidate category menu item list caches
         invalidate_menu_items_cache(
             str(menu_item.category_id)
         )
 
         return updated_menu_item
-
+    
     def delete(
         self,
         menu_item_id: UUID,
         current_user: CurrentUser,
     ) -> None:
 
-        menu_item = self.get_by_id(menu_item_id)
+        menu_item = self._get_by_id_from_database(
+            menu_item_id
+        )
         self.authorization_service.authorize_restaurant_owner(
             menu_item.category.restaurant,
             current_user,
@@ -306,3 +314,20 @@ class MenuItemService:
         menu_item_ids: list[UUID],
     ) -> list[MenuItem]:
         return self.menu_item_repo.get_by_ids(menu_item_ids)
+    
+    
+    def _get_by_id_from_database(
+        self,
+        menu_item_id: UUID,
+    ) -> MenuItem:
+        menu_item = self.menu_item_repo.get_by_id(
+            menu_item_id
+        )
+
+        if menu_item is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Menu item not found.",
+            )
+
+        return menu_item
