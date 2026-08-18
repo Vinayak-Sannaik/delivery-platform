@@ -13,6 +13,9 @@ import DashboardPage from "../../modules/dashboard/pages/DashboardPage";
 
 import RestaurantsPage from "../../modules/restaurants/pages/RestaurantsPage";
 import RestaurantDetailsPage from "../../modules/restaurants/pages/RestaurantDetailsPage";
+import ManageRestaurantsPage from "../../modules/restaurants/pages/ManageRestaurantsPage"
+
+import RestaurantFormPage from "../../modules/restaurants/pages/RestaurantFormPage";
 
 import CartPage from "../../modules/cart/pages/CartPage";
 import OrdersPage from "../../modules/orders/pages/OrdersPage";
@@ -96,6 +99,20 @@ export const router = createBrowserRouter([
             path: "/owner/restaurants/:restaurantId/orders",
             element: <RestaurantOrdersPage />,
           },
+{
+
+  path:"/admin/restaurants",
+  element: <ManageRestaurantsPage />
+
+},
+{
+  path:"/admin/restaurants/new",
+            element: <RestaurantFormPage />,
+},
+{
+  path:"/admin/restaurants/:id/edit",
+            element: <RestaurantFormPage />,
+},
 
           // Delivery Partner
           {

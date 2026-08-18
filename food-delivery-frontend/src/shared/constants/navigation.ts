@@ -1,10 +1,10 @@
+
 import {
-  IconLayoutDashboard,
+  IconHome,
   IconBuildingStore,
-  IconClipboardList,
-  IconTruckDelivery,
-  // IconActivity,
-  // IconSettings,
+  IconTruck,
+  IconCategory,
+  IconToolsKitchen2,
 } from "@tabler/icons-react";
 
 import type { TablerIcon } from "@tabler/icons-react";
@@ -17,58 +17,54 @@ export interface NavigationItem {
   roles: UserRole[];
 }
 
-export const navigation: NavigationItem[] = [
+
+export const navigation = [
   {
     label: "Dashboard",
     path: "/dashboard",
-    icon: IconLayoutDashboard,
-    roles: [
-      UserRole.ADMIN,
-      UserRole.RESTAURANT_OWNER,
-      UserRole.DELIVERY_PARTNER,
-    ],
+    icon: IconHome,
+    roles: ["CUSTOMER", "RESTAURANT_OWNER", "DELIVERY_PARTNER", "ADMIN"],
   },
 
   {
     label: "Restaurants",
     path: "/restaurants",
     icon: IconBuildingStore,
-    roles: [UserRole.CUSTOMER],
+    roles: ["CUSTOMER", "RESTAURANT_OWNER", "ADMIN"],
   },
 
   {
-    label: "Orders",
-    path: "/orders",
-    icon: IconClipboardList,
-    roles: [
-      UserRole.CUSTOMER,
-      UserRole.RESTAURANT_OWNER,
-    ],
+    label: "My Restaurants",
+    path: "/owner/restaurants",
+    icon: IconBuildingStore,
+    roles: ["RESTAURANT_OWNER"],
   },
 
   {
-    label: "Delivery",
-    path: "/delivery",
-    icon: IconTruckDelivery,
-    roles: [UserRole.DELIVERY_PARTNER],
+    label: "Categories",
+    path: "/admin/categories",
+    icon: IconCategory,
+    roles: ["ADMIN"],
   },
 
-  // {
-  //   label: "System Health",
-  //   path: "/health",
-  //   icon: IconActivity,
-  //   roles: [UserRole.ADMIN],
-  // },
+  {
+    label: "Menu Items",
+    path: "/admin/menu-items",
+    icon: IconToolsKitchen2,
+    roles: ["ADMIN"],
+  },
 
-  // {
-  //   label: "Settings",
-  //   path: "/settings",
-  //   icon: IconSettings,
-  //   roles: [
-  //     UserRole.ADMIN,
-  //     UserRole.CUSTOMER,
-  //     UserRole.RESTAURANT_OWNER,
-  //     UserRole.DELIVERY_PARTNER,
-  //   ],
-  // },
+  {
+    label: "Manage Restaurants",
+    path: "/admin/restaurants",
+    icon: IconBuildingStore,
+    roles: ["ADMIN"],
+  },
+
+  {
+    label: "Deliveries",
+    path: "/admin/deliveries",
+    icon: IconTruck,
+    roles: ["ADMIN"],
+  },
 ];
