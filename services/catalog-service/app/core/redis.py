@@ -45,12 +45,10 @@ def get_restaurants_list_cache_key(
     )
     
 def invalidate_restaurant_list_cache() -> None:
-    keys = redis_client.scan_iter(
-        match="restaurants:list:*"
-    )
+    keys = redis_client.keys("restaurants:list:*")
 
-    for key in keys:
-        redis_client.delete(key)
+    if keys:
+        redis_client.delete(*keys)
 
 
 # --------------------------------------------------
@@ -107,11 +105,9 @@ def invalidate_menu_items_cache(
     category_id: str,
 ) -> None:
 
-    pattern = (
-        f"menu-items:list:{category_id}:*"
-    )
+    pattern = f"menu-items:list:{category_id}:*"
 
-    for key in redis_client.scan_iter(
-        match=pattern
-    ):
-        redis_client.delete(key)
+    keys = redis_client.keys(pattern)
+
+    if keys:
+        redis_client.delete(*keys)
