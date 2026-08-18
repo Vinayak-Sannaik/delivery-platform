@@ -139,5 +139,6 @@ def update_category(
 def delete_category(
     category_id: UUID,
     service: CategoryService = Depends(get_category_service),
+    current_user: CurrentUser = Depends(require_restaurant_owner)
 ):
-    service.delete(category_id)
+    service.delete(category_id, current_user)

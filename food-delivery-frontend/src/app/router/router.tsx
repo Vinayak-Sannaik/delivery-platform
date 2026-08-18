@@ -13,7 +13,10 @@ import DashboardPage from "../../modules/dashboard/pages/DashboardPage";
 
 import RestaurantsPage from "../../modules/restaurants/pages/RestaurantsPage";
 import RestaurantDetailsPage from "../../modules/restaurants/pages/RestaurantDetailsPage";
-import ManageRestaurantsPage from "../../modules/restaurants/pages/ManageRestaurantsPage"
+import ManageRestaurantsPage from "../../modules/restaurants/pages/ManageRestaurantsPage";
+
+import ManageCategoriesPage from "../../modules/categories/pages/ManageCategoriesPage";
+import CategoryFormPage from "../../modules/categories/pages/CategoryFormPage";
 
 import RestaurantFormPage from "../../modules/restaurants/pages/RestaurantFormPage";
 
@@ -99,20 +102,33 @@ export const router = createBrowserRouter([
             path: "/owner/restaurants/:restaurantId/orders",
             element: <RestaurantOrdersPage />,
           },
-{
-
-  path:"/admin/restaurants",
-  element: <ManageRestaurantsPage />
-
-},
-{
-  path:"/admin/restaurants/new",
+          {
+            path: "/admin/restaurants",
+            element: <ManageRestaurantsPage />,
+          },
+          {
+            path: "/admin/restaurants/new",
             element: <RestaurantFormPage />,
-},
-{
-  path:"/admin/restaurants/:id/edit",
+          },
+          {
+            path: "/admin/restaurants/:id/edit",
             element: <RestaurantFormPage />,
-},
+          },
+
+          {
+            path: "/admin/categories",
+            element: <ManageCategoriesPage />,
+          },
+
+          {
+            path: "/admin/categories/new",
+            element: <CategoryFormPage />,
+          },
+
+          {
+            path: "/admin/categories/:id/edit",
+            element: <CategoryFormPage />,
+          },
 
           // Delivery Partner
           {
