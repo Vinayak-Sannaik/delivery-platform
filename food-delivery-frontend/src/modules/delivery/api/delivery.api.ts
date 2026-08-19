@@ -3,7 +3,7 @@ import { apiClient } from "../../../shared/api/client";
 export interface Delivery {
   id: string;
   order_id: string;
-  delivery_partner_id: string;
+  delivery_partner_id: string | null;
   status: string;
   created_at: string;
   updated_at: string;

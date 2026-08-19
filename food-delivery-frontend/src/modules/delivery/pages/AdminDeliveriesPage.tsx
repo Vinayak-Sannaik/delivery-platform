@@ -12,6 +12,7 @@ import { useState } from "react";
 
 import { useAllDeliveries } from "../hooks/useAllDeliveries";
 import { useUpdateDeliveryStatus } from "../hooks/useUpdateDeliveryStatus";
+import type { Delivery } from "../api/delivery.api";
 
 const statusColor: Record<string, string> = {
   PENDING: "yellow",
@@ -58,7 +59,7 @@ export default function AdminDeliveriesPage() {
         All Deliveries
       </Title>
 
-      {data?.map((delivery) => (
+      {data?.map((delivery: Delivery) => (
         <Card
           key={delivery.id}
           withBorder
