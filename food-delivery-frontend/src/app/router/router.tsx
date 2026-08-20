@@ -20,7 +20,6 @@ import CategoryFormPage from "../../modules/categories/pages/CategoryFormPage";
 
 import RestaurantFormPage from "../../modules/restaurants/pages/RestaurantFormPage";
 
-
 import CartPage from "../../modules/cart/pages/CartPage";
 import OrdersPage from "../../modules/orders/pages/OrdersPage";
 
@@ -32,133 +31,138 @@ import AdminDeliveriesPage from "../../modules/delivery/pages/AdminDeliveriesPag
 import ManageMenuItemsPage from "../../modules/menu/pages/ManageMenuItemsPage";
 import MenuItemFormPage from "../../modules/menu/pages/MenuItemFormPage";
 
-export const router = createBrowserRouter([
-  // --------------------------------------------------
-  // Warmup
-  // --------------------------------------------------
+export const router = createBrowserRouter(
+  [
+    // --------------------------------------------------
+    // Warmup
+    // --------------------------------------------------
+    {
+      element: <BlankLayout />,
+      children: [
+        {
+          path: "/",
+          element: <WarmupPage />,
+        },
+      ],
+    },
+
+    // --------------------------------------------------
+    // Authentication
+    // --------------------------------------------------
+    {
+      element: <AuthLayout />,
+      children: [
+        {
+          path: "/login",
+          element: <LoginPage />,
+        },
+        {
+          path: "/register",
+          element: <RegisterPage />,
+        },
+      ],
+    },
+
+    // --------------------------------------------------
+    // Protected Application
+    // --------------------------------------------------
+    {
+      element: <ProtectedRoute />,
+      children: [
+        {
+          element: <AppLayout />,
+          children: [
+            // Dashboard
+            {
+              path: "/dashboard",
+              element: <DashboardPage />,
+            },
+
+            // Customer
+            {
+              path: "/restaurants",
+              element: <RestaurantsPage />,
+            },
+            {
+              path: "/restaurants/:id",
+              element: <RestaurantDetailsPage />,
+            },
+            {
+              path: "/cart",
+              element: <CartPage />,
+            },
+            {
+              path: "/orders",
+              element: <OrdersPage />,
+            },
+
+            // Restaurant Owner
+            {
+              path: "/owner/restaurants",
+              element: <OwnerRestaurantsPage />,
+            },
+            {
+              path: "/owner/restaurants/:restaurantId/orders",
+              element: <RestaurantOrdersPage />,
+            },
+            {
+              path: "/admin/restaurants",
+              element: <ManageRestaurantsPage />,
+            },
+            {
+              path: "/admin/restaurants/new",
+              element: <RestaurantFormPage />,
+            },
+            {
+              path: "/admin/restaurants/:id/edit",
+              element: <RestaurantFormPage />,
+            },
+
+            {
+              path: "/admin/categories",
+              element: <ManageCategoriesPage />,
+            },
+
+            {
+              path: "/admin/categories/new",
+              element: <CategoryFormPage />,
+            },
+
+            {
+              path: "/admin/categories/:id/edit",
+              element: <CategoryFormPage />,
+            },
+
+            {
+              path: "/admin/menu-items",
+              element: <ManageMenuItemsPage />,
+            },
+            {
+              path: "/admin/menu-items/new",
+              element: <MenuItemFormPage />,
+            },
+            {
+              path: "/admin/menu-items/:id/edit",
+              element: <MenuItemFormPage />,
+            },
+
+            // Delivery Partner
+            {
+              path: "/delivery",
+              element: <DeliveryDashboardPage />,
+            },
+
+            // Admin
+            {
+              path: "/admin/deliveries",
+              element: <AdminDeliveriesPage />,
+            },
+          ],
+        },
+      ],
+    },
+  ],
   {
-    element: <BlankLayout />,
-    children: [
-      {
-        path: "/",
-        element: <WarmupPage />,
-      },
-    ],
+    basename: "/delivery-platform",
   },
-
-  // --------------------------------------------------
-  // Authentication
-  // --------------------------------------------------
-  {
-    element: <AuthLayout />,
-    children: [
-      {
-        path: "/login",
-        element: <LoginPage />,
-      },
-      {
-        path: "/register",
-        element: <RegisterPage />,
-      },
-    ],
-  },
-
-  // --------------------------------------------------
-  // Protected Application
-  // --------------------------------------------------
-  {
-    element: <ProtectedRoute />,
-    children: [
-      {
-        element: <AppLayout />,
-        children: [
-          // Dashboard
-          {
-            path: "/dashboard",
-            element: <DashboardPage />,
-          },
-
-          // Customer
-          {
-            path: "/restaurants",
-            element: <RestaurantsPage />,
-          },
-          {
-            path: "/restaurants/:id",
-            element: <RestaurantDetailsPage />,
-          },
-          {
-            path: "/cart",
-            element: <CartPage />,
-          },
-          {
-            path: "/orders",
-            element: <OrdersPage />,
-          },
-
-          // Restaurant Owner
-          {
-            path: "/owner/restaurants",
-            element: <OwnerRestaurantsPage />,
-          },
-          {
-            path: "/owner/restaurants/:restaurantId/orders",
-            element: <RestaurantOrdersPage />,
-          },
-          {
-            path: "/admin/restaurants",
-            element: <ManageRestaurantsPage />,
-          },
-          {
-            path: "/admin/restaurants/new",
-            element: <RestaurantFormPage />,
-          },
-          {
-            path: "/admin/restaurants/:id/edit",
-            element: <RestaurantFormPage />,
-          },
-
-          {
-            path: "/admin/categories",
-            element: <ManageCategoriesPage />,
-          },
-
-          {
-            path: "/admin/categories/new",
-            element: <CategoryFormPage />,
-          },
-
-          {
-            path: "/admin/categories/:id/edit",
-            element: <CategoryFormPage />,
-          },
-
-          {
-  path: "/admin/menu-items",
-  element: <ManageMenuItemsPage />,
-},
-{
-  path: "/admin/menu-items/new",
-  element: <MenuItemFormPage />,
-},
-{
-  path: "/admin/menu-items/:id/edit",
-  element: <MenuItemFormPage />,
-},
-
-          // Delivery Partner
-          {
-            path: "/delivery",
-            element: <DeliveryDashboardPage />,
-          },
-
-          // Admin
-          {
-            path: "/admin/deliveries",
-            element: <AdminDeliveriesPage />,
-          },
-        ],
-      },
-    ],
-  },
-]);
+);
