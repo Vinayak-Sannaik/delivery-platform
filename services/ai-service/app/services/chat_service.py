@@ -1,10 +1,14 @@
 from fastapi import HTTPException, status
 
+from app.ai.agent import AIAgent
 from app.core.config import settings
 from app.schemas.chat import ChatRequest, ChatResponse
 
 
 class ChatService:
+
+    def __init__(self):
+        self.agent = AIAgent()
 
     async def chat(
         self,
@@ -17,13 +21,11 @@ class ChatService:
                 detail="AI assistant is currently disabled.",
             )
 
-        # Phase 1 placeholder.
-        # LLM orchestration will be added next.
+        response = await self.agent.run(
+            request.message
+        )
 
         return ChatResponse(
-            message=(
-                f"AI received your message: "
-                f"{request.message}"
-            ),
+            message=response,
             conversation_id=request.conversation_id,
         )

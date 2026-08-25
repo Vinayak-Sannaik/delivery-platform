@@ -10,10 +10,10 @@ class Settings(BaseSettings):
 
     catalog_service_url: str
 
-    llm_provider: str = "gemini"
-    llm_model: str = ""
+    llm_provider: str = "groq"
+    llm_model: str = "openai/gpt-oss-120b"
 
-    gemini_api_key: str = ""
+    groq_api_key: str = ""
 
     model_config = SettingsConfigDict(
         env_file=".env",
