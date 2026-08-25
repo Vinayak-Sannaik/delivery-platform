@@ -1,0 +1,1 @@
+Chat → LLM → search_menu tool → Catalog Service → response
