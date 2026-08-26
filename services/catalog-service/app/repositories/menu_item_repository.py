@@ -38,16 +38,16 @@ class MenuItemRepository:
     def get_all(
         self,
         category_id: UUID,
-        name : str | None = None,
-        is_available : bool | None = None,
+        name: str | None = None,
+        is_available: bool | None = None,
         min_price: Decimal | None = None,
         max_price: Decimal | None = None,
         skip: int = 0,
         limit: int = 10,
     ) -> list[MenuItem]:
         stmt = select(MenuItem).where(
-    MenuItem.category_id == category_id
-)
+            MenuItem.category_id == category_id
+        )
 
         if name:
             stmt = stmt.where(
@@ -86,7 +86,7 @@ class MenuItemRepository:
         self.db.delete(menu_item)
         self.db.commit()
         return True
-    
+
     def search(
         self,
         category_id: UUID,
@@ -94,7 +94,7 @@ class MenuItemRepository:
         skip: int = 0,
         limit: int = 10,
     ) -> list[MenuItem]:
-        
+
         stmt = (
             select(MenuItem)
             .where(
@@ -108,14 +108,14 @@ class MenuItemRepository:
             .offset(skip)
             .limit(limit)
         )
-        
+
         return list(self.db.scalars(stmt).all())
-        
+
     def list_available_by_category(
         self,
         category_id: UUID,
     ) -> list[MenuItem]:
-        
+
         stmt = (
             select(MenuItem)
             .where(
@@ -139,3 +139,45 @@ class MenuItemRepository:
         )
 
         return self.db.scalars(stmt).all()
+
+    def search_ai(
+        self,
+        name: str | None = None,
+        is_available: bool | None = True,
+        min_price: Decimal | None = None,
+        max_price: Decimal | None = None,
+        skip: int = 0,
+        limit: int = 20,
+    ) -> list[MenuItem]:
+
+        stmt = select(MenuItem)
+
+        if name:
+            stmt = stmt.where(
+                MenuItem.name.ilike(f"%{name}%")
+            )
+
+        if is_available is not None:
+            stmt = stmt.where(
+                MenuItem.is_available == is_available
+            )
+
+        if min_price is not None:
+            stmt = stmt.where(
+                MenuItem.price >= min_price
+            )
+
+        if max_price is not None:
+            stmt = stmt.where(
+                MenuItem.price <= max_price
+            )
+
+        stmt = (
+            stmt
+            .offset(skip)
+            .limit(limit)
+        )
+        
+        print("SQL: " + str(stmt) + "\n")
+
+        return self.db.execute(stmt).scalars().all()

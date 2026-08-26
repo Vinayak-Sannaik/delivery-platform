@@ -12,8 +12,7 @@ from app.schemas.auth import CurrentUser
 from app.services.authorization_service import AuthorizationService
 
 from app.schemas.menu_item import CreateMenuItem, UpdateMenuItem,  MenuItemResponse
-from app.core.redis import   redis_client,  get_menu_item_cache_key,  get_menu_items_list_cache_key, invalidate_menu_items_cache,  MENU_ITEM_CACHE_TTL
-
+from app.core.redis import redis_client,  get_menu_item_cache_key,  get_menu_items_list_cache_key, invalidate_menu_items_cache,  MENU_ITEM_CACHE_TTL
 
 class MenuItemService:
     def __init__(
@@ -43,7 +42,6 @@ class MenuItemService:
     #         status_code=status.HTTP_403_FORBIDDEN,
     #         detail="You are not authorized to perform this action on this restaurant.",
     #     )
-        
 
     def create(
         self,
@@ -97,7 +95,7 @@ class MenuItemService:
         self,
         menu_item_id: UUID,
     ) -> MenuItemResponse:
-        
+
         cache_key = get_menu_item_cache_key(
             str(menu_item_id)
         )
@@ -106,7 +104,7 @@ class MenuItemService:
         # Redis HIT
         # -----------------------------
         cached = redis_client.get(cache_key)
-        
+
         if cached:
             print("FROM CACHE")
             return MenuItemResponse.model_validate_json(
@@ -279,7 +277,7 @@ class MenuItemService:
         )
 
         return updated_menu_item
-    
+
     def delete(
         self,
         menu_item_id: UUID,
@@ -300,7 +298,7 @@ class MenuItemService:
         )
 
         redis_client.delete(
-            get_menu_item_cache_key(         
+            get_menu_item_cache_key(
                 str(menu_item_id)
             )
         )
@@ -314,8 +312,7 @@ class MenuItemService:
         menu_item_ids: list[UUID],
     ) -> list[MenuItem]:
         return self.menu_item_repo.get_by_ids(menu_item_ids)
-    
-    
+
     def _get_by_id_from_database(
         self,
         menu_item_id: UUID,
@@ -331,3 +328,30 @@ class MenuItemService:
             )
 
         return menu_item
+
+    def search(
+        self,
+        name: str | None = None,
+        min_price: Decimal | None = None,
+        max_price: Decimal | None = None,
+        is_available: bool | None = True,
+        skip: int = 0,
+        limit: int = 20,
+    ) -> list[MenuItemResponse]:
+
+        menu_items = self.menu_item_repo.search_ai(
+            name=name,
+            min_price=min_price,
+            max_price=max_price,
+            is_available=is_available,
+            skip=skip,
+            limit=limit,
+        )
+
+        return [
+            MenuItemResponse.model_validate(
+                item,
+                from_attributes=True,
+            )
+            for item in menu_items
+        ]
