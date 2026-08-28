@@ -21,5 +21,5 @@ def health():
 
 app.include_router(
     chat_router,
-    prefix="/api/ai",
+    # prefix="/api/ai",
 )
