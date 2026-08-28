@@ -4,6 +4,7 @@ from app.core.config import settings
 
 
 class CatalogClient:
+    
 
     async def search_menu(
         self,
@@ -38,6 +39,21 @@ class CatalogClient:
                 params=params,
             )
 
+            response.raise_for_status()
+            
+            # print("Catalog Client status_code", response.json())
+
+    async def get_menu_item(
+        self,
+        menu_item_id: str,
+    ):
+        url = (
+            f"{settings.catalog_service_url}"
+            f"/menu-items/{menu_item_id}"
+        )
+
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            response = await client.get(url)
             response.raise_for_status()
 
             return response.json()

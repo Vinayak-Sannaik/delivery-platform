@@ -1,25 +1,43 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter
 
-from app.schemas.chat import ChatRequest, ChatResponse
-from app.services.chat_service import ChatService
+from app.schemas.chat import (
+    ChatRequest,
+    ChatResponse,
+)
+from app.ai.agent import AIAgent
+from app.conversations.repository import ConversationRepository
 
 
 router = APIRouter(
-    prefix="/chat",
-    tags=["AI Chat"],
+    prefix="/api/ai",
+    tags=["AI"],
 )
 
-
-def get_chat_service() -> ChatService:
-    return ChatService()
+agent = AIAgent()
+conversation_repository = ConversationRepository()
 
 
 @router.post(
-    "",
+    "/chat",
     response_model=ChatResponse,
 )
 async def chat(
     request: ChatRequest,
-    service: ChatService = Depends(get_chat_service),
 ):
-    return await service.chat(request)
+
+    conversation_id = request.conversation_id
+
+    if not conversation_id:
+        conversation_id = (
+            conversation_repository.create()
+        )
+
+    response = await agent.run(
+        conversation_id=conversation_id,
+        message=request.message,
+    )
+
+    return ChatResponse(
+        conversation_id=conversation_id,
+        message=response,
+    )

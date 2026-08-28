@@ -17,6 +17,7 @@ class UpdateMenuItem(BaseModel):
     
 class MenuItemResponse(CreateMenuItem):
     id: UUID
+    category_id: UUID
     model_config = {
         "from_attributes": True
     }

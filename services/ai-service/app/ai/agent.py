@@ -2,6 +2,7 @@ from app.ai.llm import LLMClient
 from app.ai.prompts import SYSTEM_PROMPT
 from app.tools.executor import ToolExecutor
 from app.tools.menu_search import MENU_SEARCH_TOOL
+from app.tools.menu_item import GET_MENU_ITEM_TOOL
 from app.conversations.repository import ConversationRepository
 
 import logging
@@ -59,7 +60,10 @@ class AIAgent:
 
         response = await self.llm.chat(
             messages=messages,
-            tools=[MENU_SEARCH_TOOL],
+            tools=[
+                MENU_SEARCH_TOOL,
+                GET_MENU_ITEM_TOOL,
+            ]
         )
 
         # No tool call

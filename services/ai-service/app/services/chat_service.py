@@ -23,7 +23,7 @@ class ChatService:
 
         response = await self.agent.run(
             request.message,
-            request.conversation_id
+            # request.conversation_id
         )
 
         return ChatResponse(
