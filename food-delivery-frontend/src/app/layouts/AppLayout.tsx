@@ -6,6 +6,8 @@ import AppSidebar from "../../shared/components/AppSidebar";
 
 import { useUIStore } from "../../shared/store/ui.store";
 
+import AIChat from "../../modules/ai/components/AIChat";
+
 export default function AppLayout() {
   const sidebarOpened = useUIStore(
     (state) => state.sidebarOpened
@@ -36,6 +38,9 @@ export default function AppLayout() {
       <AppShell.Main>
         <Outlet />
       </AppShell.Main>
+
+       <AIChat />
+
     </AppShell>
   );
 }
